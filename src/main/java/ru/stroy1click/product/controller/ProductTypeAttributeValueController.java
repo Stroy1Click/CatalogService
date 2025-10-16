@@ -13,6 +13,10 @@ import ru.stroy1click.product.dto.ProductTypeAttributeValueDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.product.type.ProductTypeAttributeValueService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
+import ru.stroy1click.product.validator.product.ProductAttributeValueCreateValidator;
+import ru.stroy1click.product.validator.product.ProductAttributeValueUpdateValidator;
+import ru.stroy1click.product.validator.product.type.ProductTypeAttributeValueCreateValidator;
+import ru.stroy1click.product.validator.product.type.ProductTypeAttributeValueUpdateValidator;
 
 import java.util.Locale;
 
@@ -24,6 +28,10 @@ import java.util.Locale;
 public class ProductTypeAttributeValueController {
 
     private final ProductTypeAttributeValueService productTypeAttributeValueService;
+
+    private final ProductTypeAttributeValueCreateValidator createValidator;
+
+    private final ProductTypeAttributeValueUpdateValidator updateValidator;
 
     private final MessageSource messageSource;
 
@@ -40,6 +48,8 @@ public class ProductTypeAttributeValueController {
         if(bindingResult.hasErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
         ));
+
+        this.createValidator.validate(productTypeAttributeValueDto);
 
         this.productTypeAttributeValueService.create(productTypeAttributeValueDto);
         return ResponseEntity.ok(
@@ -59,6 +69,9 @@ public class ProductTypeAttributeValueController {
         if(bindingResult.hasErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
         ));
+
+        productTypeAttributeValueDto.setId(id); //for update validation
+        this.updateValidator.validate(productTypeAttributeValueDto);
 
         this.productTypeAttributeValueService.update(id, productTypeAttributeValueDto);
         return ResponseEntity.ok(

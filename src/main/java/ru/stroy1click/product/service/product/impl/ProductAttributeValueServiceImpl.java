@@ -18,6 +18,7 @@ import ru.stroy1click.product.service.product.ProductAttributeValueService;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -55,6 +56,12 @@ public class ProductAttributeValueServiceImpl implements ProductAttributeValueSe
          return this.productAttributeValueRepository.findByProduct_Id(id).stream()
                  .map(this.mapper::toDto)
                  .toList();
+    }
+
+    @Override
+    public Optional<ProductAttributeValue> getByValue(String value) {
+        log.info("getByValue {}", value);
+        return this.productAttributeValueRepository.findByValue(value);
     }
 
     @Override

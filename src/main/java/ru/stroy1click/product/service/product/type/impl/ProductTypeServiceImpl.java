@@ -152,6 +152,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Transactional
     @CacheEvict(value = "productType", key = "#id")
     public void deleteImage(Integer id, String imageName) {
+        log.info("deleteImage {}, {}", id, imageName);
         ProductType productType = this.productTypeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(

@@ -1,8 +1,10 @@
 package ru.stroy1click.product.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
 
@@ -15,5 +17,7 @@ public class AttributeDto implements Serializable {
 
     private Integer id;
 
+    @NotBlank(message = "")
+    @Length(min = 2, max = 40, message = "")
     private String title;
 }

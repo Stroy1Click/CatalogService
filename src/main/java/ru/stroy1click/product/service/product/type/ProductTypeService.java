@@ -4,19 +4,12 @@ package ru.stroy1click.product.service.product.type;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.entity.ProductType;
+import ru.stroy1click.product.service.BaseService;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface ProductTypeService {
-
-    ProductTypeDto get(Integer id);
-
-    void create(ProductTypeDto productTypeDto);
-
-    void update(Integer id, ProductTypeDto productTypeDto);
-
-    void delete(Integer id);
+public interface ProductTypeService extends BaseService<Integer, ProductTypeDto> {
 
     Optional<ProductType> getByTitle(String title);
 

@@ -19,13 +19,13 @@ public class ProductTypeDto implements Serializable {
 
     private Integer id;
 
-    @NotNull(message = "{validation.producttypedto.subcategory_id.not_null}")
-    @Min(value = 1, message = "{validation.producttypedto.subcategory_id.min}")
+    @NotNull(message = "{validation.product_type_dto.subcategory_id.not_null}")
+    @Min(value = 1, message = "{validation.product_type_dto.subcategory_id.min}")
     private Integer subcategoryId;
 
     private String image;
 
-    @NotBlank(message = "{validation.producttypedto.title.not_blank}")
-    @Length(min = 2, max = 40, message = "{validation.producttypedto.title.length}")
+    @NotBlank(message = "{validation.product_type_dto.title.not_blank}")
+    @Length(min = 2, max = 40, message = "product_type")
     private String title;
 }

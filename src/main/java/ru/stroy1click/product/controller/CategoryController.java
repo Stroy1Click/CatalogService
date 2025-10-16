@@ -15,8 +15,8 @@ import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.category.CategoryService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
-import ru.stroy1click.product.validator.CreateValidator;
-import ru.stroy1click.product.validator.UpdateValidator;
+import ru.stroy1click.product.validator.category.CategoryCreateValidator;
+import ru.stroy1click.product.validator.category.CategoryUpdateValidator;
 
 import java.util.List;
 import java.util.Locale;
@@ -30,9 +30,9 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    private final CreateValidator createValidator;
+    private final CategoryCreateValidator createValidator;
 
-    private final UpdateValidator updateValidator;
+    private final CategoryUpdateValidator updateValidator;
 
     private final MessageSource messageSource;
 

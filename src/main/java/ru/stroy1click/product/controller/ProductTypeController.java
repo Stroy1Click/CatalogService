@@ -14,8 +14,10 @@ import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
-import ru.stroy1click.product.validator.CreateValidator;
-import ru.stroy1click.product.validator.UpdateValidator;
+import ru.stroy1click.product.validator.base.CreateValidator;
+import ru.stroy1click.product.validator.base.UpdateValidator;
+import ru.stroy1click.product.validator.product.type.ProductTypeCreateValidator;
+import ru.stroy1click.product.validator.product.type.ProductTypeUpdateValidator;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,9 +31,9 @@ public class ProductTypeController {
 
     private final ProductTypeService productTypeService;
 
-    private final CreateValidator createValidator;
+    private final ProductTypeCreateValidator createValidator;
 
-    private final UpdateValidator updateValidator;
+    private final ProductTypeUpdateValidator updateValidator;
 
     private final MessageSource messageSource;
 

@@ -14,8 +14,10 @@ import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
-import ru.stroy1click.product.validator.CreateValidator;
-import ru.stroy1click.product.validator.UpdateValidator;
+import ru.stroy1click.product.validator.base.CreateValidator;
+import ru.stroy1click.product.validator.base.UpdateValidator;
+import ru.stroy1click.product.validator.subcategory.SubcategoryCreateValidator;
+import ru.stroy1click.product.validator.subcategory.SubcategoryUpdateValidator;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,9 +31,9 @@ public class SubcategoryController {
 
     private final SubcategoryService subcategoryService;
 
-    private final CreateValidator createValidator;
+    private final SubcategoryCreateValidator createValidator;
 
-    private final UpdateValidator updateValidator;
+    private final SubcategoryUpdateValidator updateValidator;
 
     private final MessageSource messageSource;
 

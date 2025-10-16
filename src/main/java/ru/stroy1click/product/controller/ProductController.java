@@ -19,8 +19,10 @@ import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.ProductPaginationService;
 import ru.stroy1click.product.service.product.ProductService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
-import ru.stroy1click.product.validator.CreateValidator;
-import ru.stroy1click.product.validator.UpdateValidator;
+import ru.stroy1click.product.validator.base.CreateValidator;
+import ru.stroy1click.product.validator.base.UpdateValidator;
+import ru.stroy1click.product.validator.product.ProductCreateValidator;
+import ru.stroy1click.product.validator.product.ProductUpdateValidator;
 
 import java.util.List;
 import java.util.Locale;
@@ -34,9 +36,9 @@ public class ProductController {
 
     private final ProductService productService;
 
-    private final CreateValidator createValidator;
+    private final ProductCreateValidator createValidator;
 
-    private final UpdateValidator updateValidator;
+    private final ProductUpdateValidator updateValidator;
 
     private final ProductPaginationService productPaginationService;
 

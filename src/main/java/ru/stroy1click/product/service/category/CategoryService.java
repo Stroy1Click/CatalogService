@@ -1,23 +1,17 @@
 package ru.stroy1click.product.service.category;
 
 import org.springframework.web.multipart.MultipartFile;
+import ru.stroy1click.product.dto.AttributeDto;
 import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.entity.Category;
+import ru.stroy1click.product.service.BaseService;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CategoryService {
-
-    CategoryDto get(Integer id);
+public interface CategoryService extends BaseService<Integer, CategoryDto> {
 
     List<CategoryDto> getAll();
-
-    void create(CategoryDto categoryDto);
-
-    void update(Integer id, CategoryDto categoryDto);
-
-    void delete(Integer id);
 
     Optional<Category> getByTitle(String title);
 

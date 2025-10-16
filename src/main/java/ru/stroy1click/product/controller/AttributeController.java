@@ -13,6 +13,8 @@ import ru.stroy1click.product.dto.AttributeDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.attribute.AttributeService;
 import ru.stroy1click.product.util.ValidationErrorUtils;
+import ru.stroy1click.product.validator.attribute.AttributeCreateValidator;
+import ru.stroy1click.product.validator.attribute.AttributeUpdateValidator;
 
 import java.util.Locale;
 
@@ -24,6 +26,10 @@ import java.util.Locale;
 public class AttributeController {
 
     private final AttributeService attributeService;
+
+    private final AttributeCreateValidator createValidator;
+
+    private final AttributeUpdateValidator updateValidator;
 
     private final MessageSource messageSource;
 
@@ -41,10 +47,12 @@ public class AttributeController {
                 bindingResult.getFieldErrors()
         ));
 
+        this.createValidator.validate(attributeDto);
+
         this.attributeService.create(attributeDto);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
-                        "",
+                        "info.attribute.create",
                         null,
                         Locale.getDefault()
                 )
@@ -60,10 +68,13 @@ public class AttributeController {
                 bindingResult.getFieldErrors()
         ));
 
+        attributeDto.setId(id); //for update validator
+        this.updateValidator.validate(attributeDto);
+
         this.attributeService.update(id, attributeDto);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
-                        "",
+                        "info.attribute.update",
                         null,
                         Locale.getDefault()
                 )
@@ -76,7 +87,7 @@ public class AttributeController {
         this.attributeService.delete(id);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
-                        "",
+                        "info.attribute.delete",
                         null,
                         Locale.getDefault()
                 )

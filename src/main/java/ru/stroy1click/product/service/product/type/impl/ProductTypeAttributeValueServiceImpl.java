@@ -18,6 +18,7 @@ import ru.stroy1click.product.service.product.type.ProductTypeAttributeValueServ
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -58,6 +59,12 @@ public class ProductTypeAttributeValueServiceImpl implements ProductTypeAttribut
     }
 
     @Override
+    public Optional<ProductTypeAttributeValue> getByValue(String value) {
+        log.info("getByValue {}", value);
+        return this.productTypeAttributeValueRepository.findByValue(value);
+    }
+
+    @Override
     @Transactional
     @CacheEvict(cacheNames = "allProductAttributeValuesByProductTypeId", key = "#productTypeAttributeValueDto.productTypeId")
     public void create(ProductTypeAttributeValueDto productTypeAttributeValueDto) {
@@ -93,6 +100,7 @@ public class ProductTypeAttributeValueServiceImpl implements ProductTypeAttribut
             @CacheEvict(value = "allProductAttributeValuesByProductTypeId", key = "#productTypeAttributeValueDto.productTypeId")
     })
     public void update(Integer id, ProductTypeAttributeValueDto productTypeAttributeValueDto) {
+        log.info("update {}, {}", id, productTypeAttributeValueDto);
         this.productTypeAttributeValueRepository.findById(id).ifPresentOrElse(productAttributeValue -> {
             ProductTypeAttributeValue updatedProductTypeAttributeValue = ProductTypeAttributeValue.builder()
                     .value(productTypeAttributeValueDto.getValue())
