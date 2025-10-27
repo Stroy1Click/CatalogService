@@ -12,14 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductImageDto;
-import ru.stroy1click.product.entity.ProductAttributeValue;
+import ru.stroy1click.product.entity.Product;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductMapper;
-import ru.stroy1click.product.entity.Product;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.product.ProductImageService;
-import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.product.ProductService;
+import ru.stroy1click.product.service.storage.StorageService;
 
 import java.util.List;
 import java.util.Locale;
@@ -81,7 +80,6 @@ public class ProductServiceImpl implements ProductService {
             Product updatedProduct = Product.builder()
                     .id(id)
                     .title(productDto.getTitle())
-                    .brand(productDto.getBrand())
                     .description(productDto.getDescription())
                     .price(productDto.getPrice())
                     .inStock(productDto.getInStock())

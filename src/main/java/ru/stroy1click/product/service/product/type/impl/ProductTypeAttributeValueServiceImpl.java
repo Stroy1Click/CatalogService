@@ -103,6 +103,7 @@ public class ProductTypeAttributeValueServiceImpl implements ProductTypeAttribut
         log.info("update {}, {}", id, productTypeAttributeValueDto);
         this.productTypeAttributeValueRepository.findById(id).ifPresentOrElse(productAttributeValue -> {
             ProductTypeAttributeValue updatedProductTypeAttributeValue = ProductTypeAttributeValue.builder()
+                    .id(id)
                     .value(productTypeAttributeValueDto.getValue())
                     .productType(productAttributeValue.getProductType())
                     .attribute(productAttributeValue.getAttribute())

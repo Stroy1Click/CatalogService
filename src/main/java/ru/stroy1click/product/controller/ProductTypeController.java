@@ -13,9 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
+import ru.stroy1click.product.util.ImageValidatorUtils;
 import ru.stroy1click.product.util.ValidationErrorUtils;
-import ru.stroy1click.product.validator.base.CreateValidator;
-import ru.stroy1click.product.validator.base.UpdateValidator;
 import ru.stroy1click.product.validator.product.type.ProductTypeCreateValidator;
 import ru.stroy1click.product.validator.product.type.ProductTypeUpdateValidator;
 
@@ -37,6 +36,8 @@ public class ProductTypeController {
 
     private final MessageSource messageSource;
 
+    private final ImageValidatorUtils imageValidator;
+
     @GetMapping("/{id}")
     @Operation(summary = "Получить тип продукта")
     public ProductTypeDto get(@PathVariable("id") Integer id){
@@ -47,6 +48,8 @@ public class ProductTypeController {
     @Operation(summary = "Загрузить изображение типа продукта")
     public ResponseEntity<String> assignImage(@PathVariable("id") Integer id,
                                               @RequestParam("image") MultipartFile image){
+        this.imageValidator.validateImage(image);
+
         this.productTypeService.assignImage(id, image);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(

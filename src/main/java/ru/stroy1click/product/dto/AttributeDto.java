@@ -17,7 +17,7 @@ public class AttributeDto implements Serializable {
 
     private Integer id;
 
-    @NotBlank(message = "")
-    @Length(min = 2, max = 40, message = "")
+    @NotBlank(message = "{validation.attribute_dto.title.not_blank}")
+    @Length(min = 2, max = 40, message = "{validation.attribute_dto.title.length}")
     private String title;
 }

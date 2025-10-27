@@ -1,6 +1,7 @@
-package ru.stroy1click.product;
+package ru.stroy1click.product.integration;
 
 import org.springframework.boot.SpringApplication;
+import ru.stroy1click.product.Stroy1ClickProductServiceApplication;
 
 public class TestStroy1ClickProductServiceApplication {
 

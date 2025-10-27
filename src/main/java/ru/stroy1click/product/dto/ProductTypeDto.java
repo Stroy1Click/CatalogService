@@ -26,6 +26,6 @@ public class ProductTypeDto implements Serializable {
     private String image;
 
     @NotBlank(message = "{validation.product_type_dto.title.not_blank}")
-    @Length(min = 2, max = 40, message = "product_type")
+    @Length(min = 2, max = 40, message = "{validation.product_type_dto.title.length}")
     private String title;
 }

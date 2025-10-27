@@ -102,6 +102,7 @@ public class ProductAttributeValueServiceImpl implements ProductAttributeValueSe
     public void update(Integer id, ProductAttributeValueDto productAttributeValueDto) {
         this.productAttributeValueRepository.findById(id).ifPresentOrElse(productAttributeValue -> {
             ProductAttributeValue updatedProductTypeAttributeValue = ProductAttributeValue.builder()
+                    .id(id)
                     .value(productAttributeValueDto.getValue())
                     .product(productAttributeValue.getProduct())
                     .attribute(productAttributeValue.getAttribute())

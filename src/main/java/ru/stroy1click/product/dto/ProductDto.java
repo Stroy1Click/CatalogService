@@ -1,6 +1,5 @@
 package ru.stroy1click.product.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,8 +11,6 @@ import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Builder
@@ -28,10 +25,6 @@ public class ProductDto implements Serializable {
     @NotBlank(message = "{validation.productdto.title.not_blank}")
     @Length(min = 2, max = 60, message = "{validation.productdto.title.length}")
     private String title;
-
-    @NotBlank(message = "{validation.productdto.brand.not_blank}")
-    @Length(min = 2, max = 60, message = "{validation.productdto.brand.length}")
-    private String brand;
 
     @NotBlank(message = "{validation.productdto.description.not_blank}")
     @Length(max = 1000, message = "{validation.productdto.description.length}")

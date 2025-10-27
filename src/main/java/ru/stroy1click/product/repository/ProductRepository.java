@@ -15,7 +15,7 @@ import ru.stroy1click.product.specification.ProductSpecification;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> { //TODO сделать JpaSpecificationExecutor
+public interface ProductRepository extends JpaRepository<Product, Integer>, JpaSpecificationExecutor<Product> {
 
     Optional<Product> findByTitle(String title);
 

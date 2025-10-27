@@ -20,6 +20,7 @@ import ru.stroy1click.product.service.product.ProductAttributeValueService;
 import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.ProductPaginationService;
 import ru.stroy1click.product.service.product.ProductService;
+import ru.stroy1click.product.util.ImageValidatorUtils;
 import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.product.ProductCreateValidator;
 import ru.stroy1click.product.validator.product.ProductUpdateValidator;
@@ -47,6 +48,8 @@ public class ProductController {
     private final ProductImageService productImageService;
 
     private final ProductAttributeValueService productAttributeValueService;
+
+    private final ImageValidatorUtils imageValidator;
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить продукт")
@@ -82,7 +85,9 @@ public class ProductController {
     @PostMapping("/{id}/images")
     @Operation(summary = "Загрузить изображения продукту")
     public ResponseEntity<String> assignImages(@PathVariable("id") Integer id,
-                                               List<MultipartFile> images){
+                                               @RequestParam("images") List<MultipartFile> images){
+        this.imageValidator.validateImages(images);
+
         this.productService.assignImages(id, images);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(

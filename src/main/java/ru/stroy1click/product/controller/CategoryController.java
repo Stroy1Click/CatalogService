@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.util.ImageValidatorUtils;
 import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.category.CategoryCreateValidator;
 import ru.stroy1click.product.validator.category.CategoryUpdateValidator;
@@ -36,6 +37,8 @@ public class CategoryController {
 
     private final MessageSource messageSource;
 
+    private final ImageValidatorUtils imageValidator;
+
     @GetMapping("/{id}")
     @Operation(summary = "Получить категорию")
     public CategoryDto get(@PathVariable("id") Integer id){
@@ -52,6 +55,8 @@ public class CategoryController {
     @Operation(summary = "Загрузить изображение категории")
     public ResponseEntity<String> assignImage(@PathVariable("id") Integer id, @RequestParam("image")
                                               MultipartFile image){
+        this.imageValidator.validateImage(image);
+
         this.categoryService.assignImage(id, image);
         return ResponseEntity.ok(
                 this.messageSource.getMessage(

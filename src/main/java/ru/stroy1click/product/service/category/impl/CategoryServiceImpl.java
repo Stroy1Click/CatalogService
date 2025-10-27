@@ -9,15 +9,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
-import ru.stroy1click.product.mapper.SubcategoryMapper;
-import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.repository.CategoryRepository;
-import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.storage.StorageService;
 
 import java.util.List;
 import java.util.Locale;
@@ -32,10 +30,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     private final CategoryMapper categoryMapper;
-
-    private final SubcategoryMapper subcategoryMapper;
-
-    private final CacheClear cacheClear;
 
     private final MessageSource messageSource;
 
