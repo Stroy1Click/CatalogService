@@ -39,8 +39,4 @@ public class Product {
     @ManyToOne
     @JoinColumn(name = "product_type_id", referencedColumnName = "id")
     private ProductType productType;
-
-    @OneToMany(mappedBy = "product")
-    private List<ProductAttributeValue> productAttributeValue;
-
 }
