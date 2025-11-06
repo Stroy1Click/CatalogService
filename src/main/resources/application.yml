@@ -29,6 +29,10 @@ logging:
 server:
   port: 7070
 
+redisson:
+  host: 127.0.0.1
+  port: 6379
+
 s3:
   access-key: 0142b1a945d74754879395d62df582c2
   secret-key: 20efa111cbc54ae79e66b03b942b2a24

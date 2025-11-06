@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import ru.stroy1click.product.dto.ProductAttributeValueDto;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductImageDto;
 
@@ -189,13 +188,6 @@ public class ProductTests {
     public void getImages_ShouldReturnList() {
         ResponseEntity<ProductImageDto[]> response = this.testRestTemplate
                 .getForEntity("/api/v1/products/1/images", ProductImageDto[].class);
-        Assertions.assertNotNull(response.getBody());
-    }
-
-    @Test
-    public void getAttributes_ShouldReturnList() {
-        ResponseEntity<ProductAttributeValueDto[]> response = this.testRestTemplate
-                .getForEntity("/api/v1/products/1/attribute-values", ProductAttributeValueDto[].class);
         Assertions.assertNotNull(response.getBody());
     }
 }

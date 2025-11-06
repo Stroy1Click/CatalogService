@@ -11,12 +11,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.product.dto.ProductAttributeValueDto;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductImageDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.model.ProductAttributeFilter;
-import ru.stroy1click.product.service.product.ProductAttributeValueService;
 import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.ProductPaginationService;
 import ru.stroy1click.product.service.product.ProductService;
@@ -47,8 +45,6 @@ public class ProductController {
 
     private final ProductImageService productImageService;
 
-    private final ProductAttributeValueService productAttributeValueService;
-
     private final ImageValidatorUtils imageValidator;
 
     @GetMapping("/{id}")
@@ -61,12 +57,6 @@ public class ProductController {
     @Operation(summary = "Получить изображения продукта")
     public List<ProductImageDto> getImages(@PathVariable("id") Integer id){
         return this.productImageService.getAllByProductId(id);
-    }
-
-    @GetMapping("/{id}/attribute-values")
-    @Operation(summary = "Получить значение атрибутов продукта")
-    public List<ProductAttributeValueDto> getAttributesValue(@PathVariable("id") Integer id){
-        return this.productAttributeValueService.getAllByProductId(id);
     }
 
     @GetMapping("/filter")
