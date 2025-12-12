@@ -40,6 +40,7 @@ public class StorageServiceImpl implements StorageService {
                             .build(),
                     RequestBody.fromBytes(image.getBytes()));
         } catch (IOException e) {
+            log.error("uploadImage error ", e);
             throwStorageException(e);
         }
         return fileName;
@@ -58,6 +59,7 @@ public class StorageServiceImpl implements StorageService {
                                 .build(),
                         RequestBody.fromBytes(file.getBytes()));
             } catch (IOException e) {
+                log.error("uploadImages error ", e);
                 throwStorageException(e);
             }
             fileNameList.add(fileName);

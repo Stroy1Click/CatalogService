@@ -1,10 +1,9 @@
 spring:
   application:
     name: Product-Service
-  profiles:
-    active: dev
   config:
-    import: application-prod.yml
+    activate:
+      on-profile: prod
   cache:
     type: redis
     cache-names: redis-cache

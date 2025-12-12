@@ -129,7 +129,6 @@ class SubcategoryTest {
                 NotFoundException.class, () -> this.subcategoryService.create(this.subcategoryDto)
         );
 
-        ArgumentCaptor<Subcategory> captor = ArgumentCaptor.forClass(Subcategory.class);
         verify(this.categoryService).get(this.subcategoryDto.getCategoryId());
         assertEquals("Category not found", notFoundException.getMessage());
     }

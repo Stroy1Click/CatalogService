@@ -32,6 +32,8 @@
         <springdoc.version>2.8.2</springdoc.version>
         <s3.version>2.33.7</s3.version>
         <resilience4j.version>2.3.0</resilience4j.version>
+        <otel.version>2.22.0</otel.version>
+        <redisson.version>3.36.0</redisson.version>
     </properties>
     <dependencies>
         <dependency>
@@ -61,7 +63,7 @@
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson</artifactId>
-            <version>3.36.0</version>
+            <version>${redisson.version}</version>
         </dependency>
 
         <dependency>
@@ -127,7 +129,35 @@
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry.instrumentation</groupId>
+            <artifactId>opentelemetry-spring-boot-starter</artifactId>
+            <version>${otel.version}</version>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.opentelemetry.instrumentation</groupId>
+                <artifactId>opentelemetry-instrumentation-bom</artifactId>
+                <version>${otel.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
