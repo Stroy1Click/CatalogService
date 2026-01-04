@@ -14,7 +14,9 @@ import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductTypeMapper;
 import ru.stroy1click.product.entity.ProductType;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.ProductTypeRepository;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
@@ -41,10 +43,13 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     private final SubcategoryService subcategoryService;
 
+    private final OutboxMessageService outboxMessageService;
+
     @Override
     @Cacheable(value = "productType", key = "#id")
     public ProductTypeDto get(Integer id) {
         log.info("get {}", id);
+
         return this.productTypeMapper.toDto(this.productTypeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -62,7 +67,8 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
         this.subcategoryService.get(productTypeDto.getSubcategoryId());
 
-        this.productTypeRepository.save(this.productTypeMapper.toEntity(productTypeDto));
+        ProductType createdProductType = this.productTypeRepository.save(this.productTypeMapper.toEntity(productTypeDto));
+        this.outboxMessageService.save(this.productTypeMapper.toDto(createdProductType), MessageType.PRODUCT_TYPE_CREATED);
     }
 
     @Override
@@ -74,6 +80,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     })
     public void update(Integer id, ProductTypeDto productTypeDto) {
         log.info("update {}, {}", id, productTypeDto);
+
         this.productTypeRepository.findById(id).ifPresentOrElse(productType -> {
             ProductType updatedProductType = ProductType.builder()
                     .id(id)
@@ -81,7 +88,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                     .subcategory(productType.getSubcategory())
                     .products(productType.getProducts())
                     .build();
+
             this.productTypeRepository.save(updatedProductType);
+            this.outboxMessageService.save(this.productTypeMapper.toDto(updatedProductType), MessageType.PRODUCT_TYPE_UPDATED);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -106,7 +115,9 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.productTypeRepository.delete(productType);
+        this.outboxMessageService.save(id, MessageType.PRODUCT_TYPE_DELETED);
         this.cacheClear.clearProductsTypesOfSubcategory(productType.getSubcategory().getId());
     }
 

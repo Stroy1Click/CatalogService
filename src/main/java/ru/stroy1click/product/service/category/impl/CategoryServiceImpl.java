@@ -1,5 +1,6 @@
 package ru.stroy1click.product.service.category.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -11,10 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.entity.Category;
+import ru.stroy1click.product.entity.OutboxMessage;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.CategoryRepository;
+import ru.stroy1click.product.repository.OutboxMessageRepository;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
 
 import java.util.List;
@@ -34,6 +39,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final MessageSource messageSource;
 
     private final StorageService storageService;
+
+    private final OutboxMessageService outboxMessageService;
 
     @Override
     @Cacheable(value = "category", key = "#id")
@@ -60,7 +67,9 @@ public class CategoryServiceImpl implements CategoryService {
     @CacheEvict(value = "allCategories", allEntries = true)
     public void create(CategoryDto categoryDto) {
         log.info("create {}", categoryDto);
-        this.categoryRepository.save(this.categoryMapper.toEntity(categoryDto));
+
+        Category createdCategory = this.categoryRepository.save(this.categoryMapper.toEntity(categoryDto));
+        this.outboxMessageService.save(this.categoryMapper.toDto(createdCategory), MessageType.CATEGORY_CREATED);
     }
 
     @Override
@@ -71,13 +80,16 @@ public class CategoryServiceImpl implements CategoryService {
     })
     public void update(Integer id, CategoryDto categoryDto) {
         log.info("update {}, {}", id, categoryDto);
+
         this.categoryRepository.findById(id).ifPresentOrElse(category -> {
             Category updateCategory = Category.builder()
                     .id(id)
                     .title(categoryDto.getTitle())
                     .products(category.getProducts())
                     .build();
+
             this.categoryRepository.save(updateCategory);
+            this.outboxMessageService.save(this.categoryMapper.toDto(updateCategory), MessageType.CATEGORY_UPDATED);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -97,6 +109,7 @@ public class CategoryServiceImpl implements CategoryService {
     })
     public void delete(Integer id) {
         log.info("delete {}", id);
+
         Category category = this.categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -105,7 +118,9 @@ public class CategoryServiceImpl implements CategoryService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.categoryRepository.delete(category);
+        this.outboxMessageService.save(id, MessageType.CATEGORY_DELETED);
     }
 
     @Override

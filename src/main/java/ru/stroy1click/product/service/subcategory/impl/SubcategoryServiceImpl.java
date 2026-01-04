@@ -15,8 +15,10 @@ import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.entity.Subcategory;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.SubcategoryRepository;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
 
@@ -42,10 +44,13 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
     private final CategoryService categoryService;
 
+    private final OutboxMessageService outboxMessageService;
+
     @Override
     @Cacheable(value = "subcategory", key = "#id")
     public SubcategoryDto get(Integer id) {
         log.info("get {}", id);
+
         return this.subcategoryMapper.toDto(this.subcategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -64,7 +69,8 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
         this.categoryService.get(subcategoryDto.getCategoryId());
 
-        this.subcategoryRepository.save(this.subcategoryMapper.toEntity(subcategoryDto));
+        Subcategory createdSubcategory = this.subcategoryRepository.save(this.subcategoryMapper.toEntity(subcategoryDto));
+        this.outboxMessageService.save(this.subcategoryMapper.toDto(createdSubcategory), MessageType.SUBCATEGORY_CREATED);
     }
 
     @Override
@@ -75,6 +81,7 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     })
     public void update(Integer id, SubcategoryDto subcategoryDto) {
         log.info("update {}, {}", id, subcategoryDto);
+
         this.subcategoryRepository.findById(id).ifPresentOrElse(subcategory -> {
             Subcategory updatedSubcategory = Subcategory.builder()
                     .id(id)
@@ -82,7 +89,9 @@ public class SubcategoryServiceImpl implements SubcategoryService {
                     .category(subcategory.getCategory())
                     .products(subcategory.getProducts())
                     .build();
+
             this.subcategoryRepository.save(updatedSubcategory);
+            this.outboxMessageService.save(this.subcategoryMapper.toDto(updatedSubcategory), MessageType.SUBCATEGORY_UPDATED);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -110,7 +119,9 @@ public class SubcategoryServiceImpl implements SubcategoryService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.subcategoryRepository.deleteById(id);
+        this.outboxMessageService.save(id, MessageType.SUBCATEGORY_DELETED);
         this.cacheClear.clearSubcategoriesOfCategory(subcategory.getCategory().getId());
     }
 

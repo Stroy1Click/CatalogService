@@ -2,9 +2,7 @@ package ru.stroy1click.product.service.product;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.ProductDto;
-import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.entity.Product;
-import ru.stroy1click.product.entity.ProductAttributeValue;
 import ru.stroy1click.product.service.BaseService;
 
 import java.util.List;

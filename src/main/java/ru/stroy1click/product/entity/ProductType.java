@@ -30,7 +30,4 @@ public class ProductType {
 
     @OneToMany(mappedBy = "productType")
     private List<Product> products;
-
-    @OneToMany(mappedBy = "productType")
-    private List<ProductTypeAttributeValue> attributes;
 }

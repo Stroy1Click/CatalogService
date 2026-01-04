@@ -3,19 +3,12 @@ package ru.stroy1click.product.service.subcategory;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Subcategory;
+import ru.stroy1click.product.service.BaseService;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface SubcategoryService {
-
-    SubcategoryDto get(Integer id);
-
-    void create(SubcategoryDto subcategoryDto);
-
-    void update(Integer id, SubcategoryDto subcategoryDto);
-
-    void delete(Integer id);
+public interface SubcategoryService extends BaseService<Integer, SubcategoryDto> {
 
     Optional<Subcategory> getByTitle(String title);
 

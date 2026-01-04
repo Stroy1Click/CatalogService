@@ -12,8 +12,10 @@ import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.SubcategoryRepository;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.subcategory.impl.SubcategoryServiceImpl;
 
@@ -43,6 +45,9 @@ class SubcategoryTest {
 
     @Mock
     private CategoryService categoryService;
+
+    @Mock
+    private OutboxMessageService outboxMessageService;
 
     @InjectMocks
     private SubcategoryServiceImpl subcategoryService;
@@ -108,13 +113,17 @@ class SubcategoryTest {
     @Test
     public void create_ShouldSaveEntity() {
         when(this.subcategoryMapper.toEntity(this.subcategoryDto)).thenReturn(this.subcategory);
+        when(this.subcategoryMapper.toDto(this.subcategory)).thenReturn(this.subcategoryDto);
         when(this.categoryService.get(this.subcategoryDto.getCategoryId())).thenReturn(this.categoryDto);
+        when(this.subcategoryRepository.save(this.subcategory)).thenReturn(this.subcategory);
 
         this.subcategoryService.create(this.subcategoryDto);
 
         ArgumentCaptor<Subcategory> captor = ArgumentCaptor.forClass(Subcategory.class);
         verify(this.subcategoryRepository).save(captor.capture());
         verify(this.categoryService).get(this.subcategoryDto.getCategoryId());
+        verify(this.outboxMessageService)
+                .save(this.subcategoryDto, MessageType.SUBCATEGORY_CREATED);
         assertThat(captor.getValue()).isEqualTo(this.subcategory);
     }
 
@@ -136,7 +145,13 @@ class SubcategoryTest {
     @Test
     public void update_ShouldUpdateExistingSubcategory() {
         SubcategoryDto updatedDto = new SubcategoryDto(1, 10, "new.png", "Phones");
+
         when(this.subcategoryRepository.findById(1)).thenReturn(Optional.of(this.subcategory));
+        when(this.subcategoryRepository.save(any(Subcategory.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        SubcategoryDto outboxDto = new SubcategoryDto(1, 10, null, "Phones");
+        when(this.subcategoryMapper.toDto(any(Subcategory.class))).thenReturn(outboxDto);
 
         this.subcategoryService.update(1, updatedDto);
 
@@ -144,10 +159,13 @@ class SubcategoryTest {
         verify(this.subcategoryRepository).save(captor.capture());
         Subcategory saved = captor.getValue();
 
+        verify(this.outboxMessageService).save(outboxDto, MessageType.SUBCATEGORY_UPDATED);
+
         assertThat(saved.getTitle()).isEqualTo("Phones");
         assertThat(saved.getCategory()).isEqualTo(this.category);
-        assertThat(saved.getImage()).isNull();
+        assertThat(saved.getImage()).isNull(); // как в твоём билдере
     }
+
 
     @Test
     public void update_ShouldThrowNotFoundException_WhenNotExists() {
@@ -166,6 +184,7 @@ class SubcategoryTest {
 
         verify(this.subcategoryRepository).deleteById(1);
         verify(this.cacheClear).clearSubcategoriesOfCategory(10);
+        verify(this.outboxMessageService).save(1, MessageType.SUBCATEGORY_DELETED);
     }
 
     @Test

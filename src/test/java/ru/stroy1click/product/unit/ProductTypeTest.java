@@ -12,7 +12,9 @@ import ru.stroy1click.product.entity.ProductType;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductTypeMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.ProductTypeRepository;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.product.type.impl.ProductTypeServiceImpl;
 import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
@@ -43,6 +45,9 @@ class ProductTypeTest {
 
     @Mock
     private SubcategoryService subcategoryService;
+
+    @Mock
+    private OutboxMessageService outboxMessageService;
 
     @InjectMocks
     private ProductTypeServiceImpl productTypeService;
@@ -109,13 +114,17 @@ class ProductTypeTest {
     @Test
     public void create_ShouldSaveEntity() {
         when(this.productTypeMapper.toEntity(this.productTypeDto)).thenReturn(this.productType);
+        when(this.productTypeMapper.toDto(this.productType)).thenReturn(this.productTypeDto);
         when(this.subcategoryService.get(this.productTypeDto.getSubcategoryId())).thenReturn(this.subcategoryDto);
+        when(this.productTypeRepository.save(this.productType)).thenReturn(this.productType);
 
         this.productTypeService.create(this.productTypeDto);
 
         ArgumentCaptor<ProductType> captor = ArgumentCaptor.forClass(ProductType.class);
         verify(this.productTypeRepository).save(captor.capture());
         verify(this.subcategoryService).get(this.productTypeDto.getSubcategoryId());
+        verify(this.outboxMessageService)
+                .save(this.productTypeDto, MessageType.PRODUCT_TYPE_CREATED);
         assertThat(captor.getValue()).isEqualTo(this.productType);
     }
 
@@ -138,7 +147,14 @@ class ProductTypeTest {
     @Test
     public void update_ShouldUpdateExistingProductType() {
         ProductTypeDto updatedDto = new ProductTypeDto(1, 5, "new.png", "New Type");
+
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.of(this.productType));
+
+        when(this.productTypeRepository.save(any(ProductType.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        ProductTypeDto outboxDto = new ProductTypeDto(1, 5, null, "New Type");
+        when(this.productTypeMapper.toDto(any(ProductType.class))).thenReturn(outboxDto);
 
         this.productTypeService.update(1, updatedDto);
 
@@ -146,10 +162,13 @@ class ProductTypeTest {
         verify(this.productTypeRepository).save(captor.capture());
         ProductType saved = captor.getValue();
 
+        verify(this.outboxMessageService).save(outboxDto, MessageType.PRODUCT_TYPE_UPDATED);
+
         assertThat(saved.getTitle()).isEqualTo("New Type");
         assertThat(saved.getSubcategory()).isEqualTo(this.subcategory);
-        assertThat(saved.getImage()).isNull();
+        assertThat(saved.getImage()).isNull(); // как в билдере
     }
+
 
     @Test
     public void update_ShouldThrowNotFoundException_WhenNotExists() {
@@ -160,7 +179,6 @@ class ProductTypeTest {
                 .hasMessage("ProductType not found");
     }
 
-    // ---------- delete() ----------
     @Test
     public void delete_ShouldRemoveProductTypeAndClearCache() {
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.of(this.productType));
@@ -168,6 +186,7 @@ class ProductTypeTest {
         this.productTypeService.delete(1);
 
         verify(this.productTypeRepository).delete(this.productType);
+        verify(this.outboxMessageService).save(1,MessageType.PRODUCT_TYPE_DELETED);
         verify(this.cacheClear).clearProductsTypesOfSubcategory(5);
     }
 

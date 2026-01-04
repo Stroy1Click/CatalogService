@@ -55,6 +55,9 @@ redisson:
   host: 127.0.0.1
   port: 6379
 
+url:
+  search: http://localhost:4045/api/v1/outbox
+
 s3:
   access-key: b0a085fad6914c2abd49b762ee2263e2
   secret-key: 2bd487564bb54e9a8231bb3944108971
@@ -88,3 +91,26 @@ resilience4j:
       productAttributeLimiter:
         limit-for-period: 30
         limit-refresh-period: 1s
+  circuitbreaker:
+    instances:
+      outboxClient:
+        registerHealthIndicator: true
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 120s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always

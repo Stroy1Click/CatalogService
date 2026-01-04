@@ -20,11 +20,7 @@ public class ProductAttributeValue {
 
     private String value;
 
-    @ManyToOne
-    @JoinColumn(name = "attribute_id", referencedColumnName = "id")
-    private Attribute attribute;
+    private Integer attributeId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
+    private Integer productId;
 }

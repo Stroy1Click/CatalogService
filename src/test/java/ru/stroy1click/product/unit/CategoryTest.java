@@ -9,8 +9,10 @@ import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.CategoryRepository;
 import ru.stroy1click.product.service.category.impl.CategoryServiceImpl;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
 
 import java.util.*;
@@ -31,6 +33,9 @@ class CategoryTest {
 
     @Mock
     private StorageService storageService;
+
+    @Mock
+    private OutboxMessageService outboxMessageService;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
@@ -73,7 +78,6 @@ class CategoryTest {
                 .hasMessage("Category not found");
     }
 
-    // ---------- getAll() ----------
     @Test
     public void getAll_ShouldReturnListOfCategoryDtos() {
         when(this.categoryRepository.findAll()).thenReturn(List.of(this.category));
@@ -97,28 +101,55 @@ class CategoryTest {
     @Test
     public void create_ShouldSaveEntity() {
         when(this.categoryMapper.toEntity(this.categoryDto)).thenReturn(this.category);
+        when(this.categoryRepository.save(this.category)).thenReturn(this.category);
+        when(this.categoryMapper.toDto(this.category)).thenReturn(this.categoryDto);
 
         this.categoryService.create(this.categoryDto);
 
         ArgumentCaptor<Category> captor = ArgumentCaptor.forClass(Category.class);
         verify(this.categoryRepository).save(captor.capture());
+        verify(this.outboxMessageService)
+                .save(this.categoryDto, MessageType.CATEGORY_CREATED);
         assertThat(captor.getValue()).isEqualTo(this.category);
     }
 
     @Test
     public void update_ShouldUpdateExistingCategory() {
         CategoryDto updatedDto = new CategoryDto(1, "new.png", "New Title");
-        when(this.categoryRepository.findById(1)).thenReturn(Optional.of(this.category));
+
+        CategoryDto mappedDto =
+                new CategoryDto(1, null, "New Title");
+
+        when(this.categoryRepository.findById(1))
+                .thenReturn(Optional.of(this.category));
+
+        when(this.categoryRepository.save(any(Category.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        when(this.categoryMapper.toDto(any(Category.class)))
+                .thenReturn(mappedDto);
 
         this.categoryService.update(1, updatedDto);
 
-        ArgumentCaptor<Category> captor = ArgumentCaptor.forClass(Category.class);
-        verify(this.categoryRepository).save(captor.capture());
-        Category saved = captor.getValue();
+        ArgumentCaptor<Category> categoryCaptor =
+                ArgumentCaptor.forClass(Category.class);
+
+        ArgumentCaptor<CategoryDto> dtoCaptor =
+                ArgumentCaptor.forClass(CategoryDto.class);
+
+        verify(this.categoryRepository).save(categoryCaptor.capture());
+        verify(this.outboxMessageService)
+                .save(dtoCaptor.capture(), eq(MessageType.CATEGORY_UPDATED));
+
+        Category saved = categoryCaptor.getValue();
+        CategoryDto eventDto = dtoCaptor.getValue();
 
         assertThat(saved.getId()).isEqualTo(1);
         assertThat(saved.getTitle()).isEqualTo("New Title");
         assertThat(saved.getProducts()).isEqualTo(this.category.getProducts());
+
+        assertThat(eventDto.getId()).isEqualTo(1);
+        assertThat(eventDto.getTitle()).isEqualTo("New Title");
     }
 
     @Test
@@ -137,6 +168,7 @@ class CategoryTest {
         this.categoryService.delete(1);
 
         verify(this.categoryRepository).delete(this.category);
+        verify(this.outboxMessageService).save(1, MessageType.CATEGORY_DELETED);
     }
 
     @Test

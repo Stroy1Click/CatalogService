@@ -1,0 +1,12 @@
+### GET request to example server
+GET http://localhost:7070/api/v1/categories/1
+###
+
+GET http://localhost:7070/api/v1/subcategories/1
+###
+
+GET http://localhost:7070/api/v1/product-types/1
+###
+
+GET http://localhost:7070/api/v1/products/1
+###

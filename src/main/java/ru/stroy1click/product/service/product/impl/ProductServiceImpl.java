@@ -15,8 +15,10 @@ import ru.stroy1click.product.dto.ProductImageDto;
 import ru.stroy1click.product.entity.Product;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.ProductService;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
@@ -52,10 +54,13 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductTypeService productTypeService;
 
+    private final OutboxMessageService outboxMessageService;
+
     @Override
     @Cacheable(value = "product", key = "#id")
     public ProductDto get(Integer id) {
         log.info("get {}", id);
+
         return this.productMapper.toDto(this.productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -75,7 +80,8 @@ public class ProductServiceImpl implements ProductService {
         this.subcategoryService.get(productDto.getSubcategoryId());
         this.productTypeService.get(productDto.getProductTypeId());
 
-        this.productRepository.save(this.productMapper.toEntity(productDto));
+        Product createdProduct = this.productRepository.save(this.productMapper.toEntity(productDto));
+        this.outboxMessageService.save(this.productMapper.toDto(createdProduct), MessageType.PRODUCT_CREATED);
 
         clearPaginationCache(productDto.getCategoryId(), productDto.getSubcategoryId(), productDto.getProductTypeId());
     }
@@ -90,6 +96,7 @@ public class ProductServiceImpl implements ProductService {
     })
     public void update(Integer id, ProductDto productDto) {
         log.info("update {}, {}", id, productDto);
+
         this.productRepository.findById(id).ifPresentOrElse(product -> {
             Product updatedProduct = Product.builder()
                     .id(id)
@@ -101,7 +108,9 @@ public class ProductServiceImpl implements ProductService {
                     .subcategory(product.getSubcategory())
                     .productType(product.getProductType())
                     .build();
+
             this.productRepository.save(updatedProduct);
+            this.outboxMessageService.save(this.productMapper.toDto(updatedProduct), MessageType.PRODUCT_UPDATED);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -117,6 +126,7 @@ public class ProductServiceImpl implements ProductService {
     @CacheEvict(value = "product", key = "#id")
     @Transactional
     public void delete(Integer id) {
+        //TODO согласовать удаление с attribute service: нужно корректное удаление кешей.
         log.info("delete {}", id);
         Product product = this.productRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -126,7 +136,9 @@ public class ProductServiceImpl implements ProductService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.productRepository.delete(product);
+        this.outboxMessageService.save(id, MessageType.PRODUCT_DELETED);
 
         clearPaginationCache(product.getCategory().getId(),
                 product.getSubcategory().getId(),
@@ -152,7 +164,6 @@ public class ProductServiceImpl implements ProductService {
                                 Locale.getDefault()
                         )
                 ));
-
         List<ProductImageDto> imageNames = this.storageService.uploadImages(images)
                 .stream()
                 .map(imageName -> new ProductImageDto(
@@ -161,6 +172,7 @@ public class ProductServiceImpl implements ProductService {
                         imageName
                 ))
                 .toList();
+
         this.productImageService.create(imageNames);
 
         clearPaginationCache(product.getCategory().getId(),
@@ -182,6 +194,7 @@ public class ProductServiceImpl implements ProductService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.productImageService.delete(link);
 
         clearPaginationCache(product.getCategory().getId(),

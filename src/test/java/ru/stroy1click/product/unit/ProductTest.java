@@ -16,8 +16,10 @@ import ru.stroy1click.product.entity.ProductType;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductMapper;
+import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.category.CategoryService;
+import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.impl.ProductServiceImpl;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
@@ -60,6 +62,9 @@ class ProductTest {
 
     @Mock
     private ProductTypeService productTypeService;
+
+    @Mock
+    private OutboxMessageService outboxMessageService;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -150,9 +155,11 @@ class ProductTest {
     @Test
     public void create_ShouldSaveEntity() {
         when(this.productMapper.toEntity(this.productDto)).thenReturn(this.product);
+        when(this.productMapper.toDto(this.product)).thenReturn(this.productDto);
         when(this.categoryService.get(this.productDto.getCategoryId())).thenReturn(this.categoryDto);
         when(this.subcategoryService.get(this.productDto.getSubcategoryId())).thenReturn(this.subcategoryDto);
         when(this.productTypeService.get(this.productDto.getProductTypeId())).thenReturn(this.productTypeDto);
+        when(this.productRepository.save(this.product)).thenReturn(this.product);
 
         this.productService.create(this.productDto);
 
@@ -160,6 +167,8 @@ class ProductTest {
         verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
         verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
         verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
+        verify(this.outboxMessageService)
+                .save(this.productDto, MessageType.PRODUCT_CREATED);
     }
 
     @Test
@@ -214,6 +223,9 @@ class ProductTest {
     public void update_ShouldUpdateExistingProduct() {
         when(this.productRepository.findById(1)).thenReturn(Optional.of(this.product));
 
+        when(this.productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
         ProductDto updatedDto = ProductDto.builder()
                 .title("NewPhone")
                 .description("Updated")
@@ -224,17 +236,34 @@ class ProductTest {
                 .productTypeId(3)
                 .build();
 
+        ProductDto outboxDto = ProductDto.builder()
+                .title("NewPhone")
+                .description("Updated")
+                .price(1099.0)
+                .inStock(true)
+                .categoryId(1)
+                .subcategoryId(2)
+                .productTypeId(3)
+                .build();
+        when(this.productMapper.toDto(any(Product.class))).thenReturn(outboxDto);
+
         this.productService.update(1, updatedDto);
 
         ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
         verify(this.productRepository).save(captor.capture());
         Product saved = captor.getValue();
 
+        verify(this.outboxMessageService).save(outboxDto, MessageType.PRODUCT_UPDATED);
+
         assertThat(saved.getTitle()).isEqualTo("NewPhone");
         assertThat(saved.getCategory()).isEqualTo(this.product.getCategory());
         assertThat(saved.getSubcategory()).isEqualTo(this.product.getSubcategory());
         assertThat(saved.getProductType()).isEqualTo(this.product.getProductType());
+        assertThat(saved.getDescription()).isEqualTo("Updated");
+        assertThat(saved.getPrice()).isEqualTo(1099.0);
+        assertThat(saved.getInStock()).isTrue();
     }
+
 
     @Test
     public void update_ShouldThrowNotFound_WhenIdNotExists() {
@@ -255,6 +284,7 @@ class ProductTest {
         verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
         verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
         verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
+        verify(this.outboxMessageService).save(1,MessageType.PRODUCT_DELETED);
     }
 
     @Test
