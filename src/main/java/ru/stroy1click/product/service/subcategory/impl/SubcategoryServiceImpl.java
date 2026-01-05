@@ -11,8 +11,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.NotFoundException;
+import ru.stroy1click.product.mapper.ProductTypeMapper;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.model.MessageType;
@@ -35,6 +37,8 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     private final SubcategoryRepository subcategoryRepository;
 
     private final SubcategoryMapper subcategoryMapper;
+
+    private final ProductTypeMapper productTypeMapper;
 
     private final CacheClear cacheClear;
 
@@ -107,7 +111,8 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "subcategory", key = "#id"),
-            @CacheEvict(value = "clearPaginationOfProductsBySubcategory", key = "#id")
+            @CacheEvict(value = "clearPaginationOfProductsBySubcategory", key = "#id"),
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
     })
     public void delete(Integer id) {
         log.info("delete {}", id);
@@ -120,9 +125,9 @@ public class SubcategoryServiceImpl implements SubcategoryService {
                         )
                 ));
 
-        this.subcategoryRepository.deleteById(id);
         this.outboxMessageService.save(id, MessageType.SUBCATEGORY_DELETED);
         this.cacheClear.clearSubcategoriesOfCategory(subcategory.getCategory().getId());
+        this.subcategoryRepository.deleteById(id);
     }
 
     @Override
@@ -132,13 +137,18 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     }
 
     @Override
-    @Cacheable(value = "subcategoriesOfCategory", key = "#categoryId")
-    public List<SubcategoryDto> getByCategoryId(Integer categoryId) {
-        log.info("getByCategoryId {}", categoryId);
-        return this.subcategoryRepository.findByCategory_Id(categoryId)
-                .stream()
-                .map(this.subcategoryMapper::toDto)
-                .toList();
+    @Cacheable(value = "productTypesBySubcategory", key = "#id")
+    public List<ProductTypeDto> getProductTypes(Integer id) {
+        Subcategory subcategory = this.subcategoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        this.messageSource.getMessage(
+                                "error.subcategory.not_found",
+                                null,
+                                Locale.getDefault()
+                        )
+                ));
+
+        return this.productTypeMapper.toDto(subcategory.getProductTypes());
     }
 
     @Override

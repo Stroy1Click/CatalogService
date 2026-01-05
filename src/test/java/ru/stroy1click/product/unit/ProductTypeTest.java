@@ -209,26 +209,6 @@ class ProductTypeTest {
     }
 
     @Test
-    public void getBySubcategory_ShouldReturnListOfDtos_WhenFound() {
-        when(this.productTypeRepository.findBySubcategory_Id(5)).thenReturn(List.of(this.productType));
-        when(this.productTypeMapper.toDto(this.productType)).thenReturn(this.productTypeDto);
-
-        List<ProductTypeDto> result = this.productTypeService.getBySubcategory(5);
-
-        assertThat(result).containsExactly(this.productTypeDto);
-        verify(this.productTypeRepository).findBySubcategory_Id(5);
-    }
-
-    @Test
-    public void getBySubcategory_ShouldThrowNotFoundException_WhenEmpty() {
-        when(this.productTypeRepository.findBySubcategory_Id(5)).thenReturn(Collections.emptyList());
-
-        assertThatThrownBy(() -> this.productTypeService.getBySubcategory(5))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("ProductType not found");
-    }
-
-    @Test
     public void assignImage_ShouldUploadImageAndClearCache() {
         MultipartFile file = mock(MultipartFile.class);
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.of(this.productType));

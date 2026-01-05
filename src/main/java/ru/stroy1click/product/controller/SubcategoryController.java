@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
@@ -44,12 +45,6 @@ public class SubcategoryController {
         return this.subcategoryService.get(id);
     }
 
-    @GetMapping("/{id}/subcategories")
-    @Operation(summary = "Получить все подкатегории, которые принадлежат категории {id}")
-    public List<SubcategoryDto> getSubcategories(@PathVariable("id") Integer id){
-        return this.subcategoryService.getByCategoryId(id);
-    }
-
     @PostMapping("/{id}/image")
     @Operation(summary = "Загрузить изображение подкатегории")
     public ResponseEntity<String> assignImage(@PathVariable("id") Integer id,
@@ -78,6 +73,12 @@ public class SubcategoryController {
                         Locale.getDefault()
                 )
         );
+    }
+
+    @GetMapping("/{id}/product-types")
+    @Operation(summary = "Получить типы продуктов по подкатегории")
+    public List<ProductTypeDto> getBySubcategory(@PathVariable("id") Integer id){
+        return this.subcategoryService.getProductTypes(id);
     }
 
     @PostMapping

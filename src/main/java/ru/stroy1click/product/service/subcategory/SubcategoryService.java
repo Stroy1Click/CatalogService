@@ -1,6 +1,7 @@
 package ru.stroy1click.product.service.subcategory;
 
 import org.springframework.web.multipart.MultipartFile;
+import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.service.BaseService;
@@ -12,7 +13,7 @@ public interface SubcategoryService extends BaseService<Integer, SubcategoryDto>
 
     Optional<Subcategory> getByTitle(String title);
 
-    List<SubcategoryDto> getByCategoryId(Integer categoryId);
+    List<ProductTypeDto> getProductTypes(Integer id);
 
     void assignImage(Integer id, MultipartFile image);
 

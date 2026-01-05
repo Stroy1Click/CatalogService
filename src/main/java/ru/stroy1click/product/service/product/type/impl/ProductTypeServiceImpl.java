@@ -127,26 +127,6 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     }
 
     @Override
-    @Cacheable(value = "productTypesBySubcategory")
-    public List<ProductTypeDto> getBySubcategory(Integer subcategoryId) {
-        log.info("getBySubcategory {}", subcategoryId);
-        List<ProductType> list = this.productTypeRepository.findBySubcategory_Id(subcategoryId);
-        if(!list.isEmpty()){
-            return list.stream()
-                    .map(this.productTypeMapper::toDto)
-                    .toList();
-        } else {
-            throw new NotFoundException(
-                    this.messageSource.getMessage(
-                            "error.product_types.not_found",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
-        }
-    }
-
-    @Override
     @Transactional
     @CacheEvict(cacheNames = "productType", key = "#id")
     public void assignImage(Integer id, MultipartFile image) {

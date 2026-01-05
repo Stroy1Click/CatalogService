@@ -13,8 +13,6 @@ public interface ProductTypeService extends BaseService<Integer, ProductTypeDto>
 
     Optional<ProductType> getByTitle(String title);
 
-    List<ProductTypeDto> getBySubcategory(Integer subcategoryId);
-
     void assignImage(Integer id, MultipartFile image);
 
     void deleteImage(Integer id, String link);

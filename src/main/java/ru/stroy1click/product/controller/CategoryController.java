@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.category.CategoryService;
 import ru.stroy1click.product.util.ImageValidatorUtils;
@@ -49,6 +50,12 @@ public class CategoryController {
     @Operation(summary = "Получить все категории")
     public List<CategoryDto> getCategories(){
         return this.categoryService.getAll();
+    }
+
+    @GetMapping("/{id}/subcategories")
+    @Operation(summary = "Получить все подкатегории, которые принадлежат категории {id}")
+    public List<SubcategoryDto> getSubcategories(@PathVariable("id") Integer id){
+        return this.categoryService.getSubcategories(id);
     }
 
     @PostMapping("/{id}/image")

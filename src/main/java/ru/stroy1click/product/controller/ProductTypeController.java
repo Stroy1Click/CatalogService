@@ -74,13 +74,6 @@ public class ProductTypeController {
         );
     }
 
-
-    @GetMapping
-    @Operation(summary = "Получить типы продуктов по подкатегории")
-    public List<ProductTypeDto> getBySubcategory(@RequestParam("subcategoryId") Integer subcategoryId){
-        return this.productTypeService.getBySubcategory(subcategoryId);
-    }
-
     @PostMapping
     @Operation(summary = "Создать тип продукта")
     public ResponseEntity<String> create(@RequestBody @Valid ProductTypeDto productTypeDto,

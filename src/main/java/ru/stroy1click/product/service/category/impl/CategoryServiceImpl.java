@@ -11,10 +11,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.entity.OutboxMessage;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
+import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.CategoryRepository;
 import ru.stroy1click.product.repository.OutboxMessageRepository;
@@ -36,6 +38,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
 
+    private final SubcategoryMapper subcategoryMapper;
+
     private final MessageSource messageSource;
 
     private final StorageService storageService;
@@ -46,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Cacheable(value = "category", key = "#id")
     public CategoryDto get(Integer id) {
         log.info("get {}", id);
+
         return this.categoryMapper.toDto(this.categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -105,7 +110,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "category", key = "#id"),
-            @CacheEvict(value = "allCategories", allEntries = true)
+            @CacheEvict(value = "allCategories", allEntries = true),
+            @CacheEvict(value = "subcategoriesOfCategory", key = "#id")
     })
     public void delete(Integer id) {
         log.info("delete {}", id);
@@ -126,7 +132,25 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Optional<Category> getByTitle(String title) {
         log.info("getByTitle {}", title);
+
         return this.categoryRepository.findByTitle(title);
+    }
+
+    @Override
+    @Cacheable(value = "subcategoriesOfCategory", key = "#id")
+    public List<SubcategoryDto> getSubcategories(Integer id) {
+        log.info("getSubcategories {}", id);
+
+        Category category = this.categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(
+                        this.messageSource.getMessage(
+                                "error.category.not_found",
+                                null,
+                                Locale.getDefault()
+                        )
+                ));
+
+        return this.subcategoryMapper.toDto(category.getSubcategories());
     }
 
     @Override
@@ -144,6 +168,7 @@ public class CategoryServiceImpl implements CategoryService {
                                 Locale.getDefault()
                         )
                 ));
+
         String imageName = this.storageService.uploadImage(image);
         category.setImage(imageName);
     }
@@ -163,6 +188,7 @@ public class CategoryServiceImpl implements CategoryService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.storageService.deleteImage(imageName);
         category.setImage(null);
     }

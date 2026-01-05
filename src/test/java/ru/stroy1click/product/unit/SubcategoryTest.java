@@ -7,10 +7,13 @@ import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Category;
+import ru.stroy1click.product.entity.ProductType;
 import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
+import ru.stroy1click.product.mapper.ProductTypeMapper;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.SubcategoryRepository;
@@ -33,6 +36,9 @@ class SubcategoryTest {
 
     @Mock
     private SubcategoryMapper subcategoryMapper;
+
+    @Mock
+    private ProductTypeMapper productTypeMapper;
 
     @Mock
     private CacheClear cacheClear;
@@ -206,35 +212,6 @@ class SubcategoryTest {
     }
 
     @Test
-    public void getByCategoryId_ShouldReturnListOfDtos() {
-        when(this.subcategoryRepository.findByCategory_Id(10)).thenReturn(List.of(this.subcategory));
-        when(this.subcategoryMapper.toDto(this.subcategory)).thenReturn(this.subcategoryDto);
-
-        List<SubcategoryDto> result = this.subcategoryService.getByCategoryId(10);
-
-        assertThat(result).containsExactly(this.subcategoryDto);
-        verify(this.subcategoryRepository).findByCategory_Id(10);
-    }
-
-    @Test
-    public void getByCategoryId_ShouldReturnEmptyList_WhenNoSubcategories() {
-        when(this.subcategoryRepository.findByCategory_Id(10)).thenReturn(Collections.emptyList());
-
-        List<SubcategoryDto> result = this.subcategoryService.getByCategoryId(10);
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
-    public void getByCategoryId_ShouldReturnEmptyList_WhenRepositoryReturnsNull() {
-        when(this.subcategoryRepository.findByCategory_Id(10)).thenReturn(List.of());
-
-        List<SubcategoryDto> result = this.subcategoryService.getByCategoryId(10);
-
-        assertThat(result).isNotNull().isEmpty();
-    }
-
-    @Test
     public void assignImage_ShouldUploadImageAndClearCache() {
         MultipartFile file = mock(MultipartFile.class);
         when(this.subcategoryRepository.findById(1)).thenReturn(Optional.of(this.subcategory));
@@ -277,6 +254,35 @@ class SubcategoryTest {
 
         verify(this.storageService).deleteImage("any.png");
         verify(this.cacheClear).clearSubcategoriesOfCategory(10);
+    }
+
+    @Test
+    public void getSubcategories_ShouldReturnListOfDtos() {
+        List<ProductType> productTypes = List.of(new ProductType(1,"title 1", "image 1",
+                this.subcategory, List.of()), new ProductType(2,"title 2", "image 2",
+                this.subcategory, List.of()));
+        List<ProductTypeDto> productTypeDtos = List.of(new ProductTypeDto(1, 1,"image 1", "title 1"),
+                new ProductTypeDto(2, 1,"image 2", "title 2"));
+        this.subcategory.setProductTypes(productTypes);
+        when(this.subcategoryRepository.findById(1)).thenReturn(Optional.of(this.subcategory));
+        when(this.productTypeMapper.toDto(productTypes)).thenReturn(productTypeDtos);
+
+        List<ProductTypeDto> result = this.subcategoryService.getProductTypes(1);
+
+
+        verify(this.subcategoryRepository).findById(1);
+        verify(this.productTypeMapper).toDto(productTypes);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getSubcategories_ShouldThrowNotFoundException_WhenCategoryNotFound() {
+        when(this.subcategoryRepository.findById(999)).thenReturn(Optional.empty());
+        when(this.messageSource.getMessage(anyString(), any(), any())).thenReturn("Subcategory not found");
+
+        assertThatThrownBy(() -> this.subcategoryService.getProductTypes(999))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Subcategory not found");
     }
 }
 

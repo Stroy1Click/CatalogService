@@ -1,14 +1,18 @@
 package ru.stroy1click.product.unit;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Category;
+import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
+import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.CategoryRepository;
 import ru.stroy1click.product.service.category.impl.CategoryServiceImpl;
@@ -18,6 +22,8 @@ import ru.stroy1click.product.service.storage.StorageService;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class CategoryTest {
@@ -27,6 +33,9 @@ class CategoryTest {
 
     @Mock
     private CategoryMapper categoryMapper;
+
+    @Mock
+    private SubcategoryMapper subcategoryMapper;
 
     @Mock
     private MessageSource messageSource;
@@ -230,5 +239,34 @@ class CategoryTest {
 
         assertThat(result).contains(this.category);
         verify(this.categoryRepository).findByTitle("Electronics");
+    }
+
+    @Test
+    public void getSubcategories_ShouldReturnListOfDtos() {
+        List<Subcategory> subcategories = List.of(new Subcategory(1,"title 1", "image 1",
+                this.category, List.of(), List.of()),  new Subcategory(2,"title 2", "image 2",
+                this.category, List.of(), List.of()));
+        List<SubcategoryDto> subcategoryDtos = List.of(new SubcategoryDto(1, 1,"image 1", "title 1"),
+                new SubcategoryDto(2, 1,"image 2", "title 2"));
+        category.setSubcategories(subcategories);
+        when(this.categoryRepository.findById(1)).thenReturn(Optional.of(this.category));
+        when(this.subcategoryMapper.toDto(subcategories)).thenReturn(subcategoryDtos);
+
+        List<SubcategoryDto> result = this.categoryService.getSubcategories(1);
+
+
+        verify(this.categoryRepository).findById(1);
+        verify(this.subcategoryMapper).toDto(subcategories);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void getSubcategories_ShouldThrowNotFoundException_WhenCategoryNotFound() {
+        when(this.categoryRepository.findById(999)).thenReturn(Optional.empty());
+        when(this.messageSource.getMessage(anyString(), any(), any())).thenReturn("Category not found");
+
+        assertThatThrownBy(() -> this.categoryService.getSubcategories(999))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Category not found");
     }
 }
