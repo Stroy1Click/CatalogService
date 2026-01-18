@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
-import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.NotFoundException;
@@ -68,13 +68,18 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Override
     @Transactional
     @CacheEvict(value = "subcategoriesOfCategory", key = "#subcategoryDto.categoryId")
-    public void create(SubcategoryDto subcategoryDto) {
+    public SubcategoryDto create(SubcategoryDto subcategoryDto) {
         log.info("create {}", subcategoryDto);
 
         this.categoryService.get(subcategoryDto.getCategoryId());
 
-        Subcategory createdSubcategory = this.subcategoryRepository.save(this.subcategoryMapper.toEntity(subcategoryDto));
-        this.outboxMessageService.save(this.subcategoryMapper.toDto(createdSubcategory), MessageType.SUBCATEGORY_CREATED);
+        SubcategoryDto createdSubcategory = this.subcategoryMapper.toDto(
+                this.subcategoryRepository.save(this.subcategoryMapper.toEntity(subcategoryDto))
+        );
+
+        this.outboxMessageService.save(createdSubcategory, MessageType.SUBCATEGORY_CREATED);
+
+        return createdSubcategory;
     }
 
     @Override

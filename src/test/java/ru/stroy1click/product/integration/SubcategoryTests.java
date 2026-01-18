@@ -46,11 +46,11 @@ class SubcategoryTests {
         SubcategoryDto dto = new SubcategoryDto(null, 1, "image.png", "Cement");
         HttpEntity<SubcategoryDto> request = new HttpEntity<>(dto);
 
-        ResponseEntity<String> response = this.testRestTemplate
-                .exchange("/api/v1/subcategories", HttpMethod.POST, request, String.class);
+        ResponseEntity<SubcategoryDto> response = this.testRestTemplate
+                .exchange("/api/v1/subcategories", HttpMethod.POST, request, SubcategoryDto.class);
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("Подкатегория создана", response.getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Assertions.assertEquals("Cement", response.getBody().getTitle());
     }
 
     @Test

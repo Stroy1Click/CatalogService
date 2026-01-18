@@ -48,11 +48,12 @@ class CategoryTests {
         CategoryDto dto = new CategoryDto(null, "Image link", "Cement");
         HttpEntity<CategoryDto> request = new HttpEntity<>(dto);
 
-        ResponseEntity<String> response = this.testRestTemplate
-                .exchange("/api/v1/categories", HttpMethod.POST, request, String.class);
+        ResponseEntity<CategoryDto> response = this.testRestTemplate
+                .exchange("/api/v1/categories", HttpMethod.POST, request, CategoryDto.class);
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("Категория создана", response.getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Assertions.assertEquals("Cement", response.getBody().getTitle());
+        Assertions.assertNotNull(response.getBody().getId());
     }
 
     @Test

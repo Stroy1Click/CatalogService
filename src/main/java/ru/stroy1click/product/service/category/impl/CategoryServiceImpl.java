@@ -1,6 +1,5 @@
 package ru.stroy1click.product.service.category.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -11,15 +10,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.CategoryDto;
+import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Category;
-import ru.stroy1click.product.entity.OutboxMessage;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.CategoryMapper;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.CategoryRepository;
-import ru.stroy1click.product.repository.OutboxMessageRepository;
 import ru.stroy1click.product.service.category.CategoryService;
 import ru.stroy1click.product.service.outbox.OutboxMessageService;
 import ru.stroy1click.product.service.storage.StorageService;
@@ -70,11 +68,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional
     @CacheEvict(value = "allCategories", allEntries = true)
-    public void create(CategoryDto categoryDto) {
+    public CategoryDto create(CategoryDto categoryDto) {
         log.info("create {}", categoryDto);
 
-        Category createdCategory = this.categoryRepository.save(this.categoryMapper.toEntity(categoryDto));
-        this.outboxMessageService.save(this.categoryMapper.toDto(createdCategory), MessageType.CATEGORY_CREATED);
+        CategoryDto createdCategory = this.categoryMapper.toDto(
+                this.categoryRepository.save(this.categoryMapper.toEntity(categoryDto))
+        );
+
+        this.outboxMessageService.save(createdCategory, MessageType.CATEGORY_CREATED);
+
+        return createdCategory;
     }
 
     @Override

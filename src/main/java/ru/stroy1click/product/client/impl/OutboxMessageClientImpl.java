@@ -3,7 +3,6 @@ package ru.stroy1click.product.client.impl;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.health.StatusAggregator;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Service;
@@ -11,7 +10,6 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import ru.stroy1click.product.client.OutboxMessageClient;
 import ru.stroy1click.product.dto.OutboxMessageDto;
-import ru.stroy1click.product.exception.AlreadyExistsException;
 import ru.stroy1click.product.exception.OutboxMessageException;
 import ru.stroy1click.product.exception.ServiceErrorResponseException;
 import ru.stroy1click.product.exception.ServiceUnavailableException;
@@ -26,13 +24,11 @@ import java.nio.charset.StandardCharsets;
 public class OutboxMessageClientImpl implements OutboxMessageClient {
 
     private final RestClient restClient;
-    private final StatusAggregator statusAggregator;
 
-    public OutboxMessageClientImpl(@Value("${url.search}") String url, StatusAggregator statusAggregator){
+    public OutboxMessageClientImpl(@Value("${url.search}") String url){
         this.restClient = RestClient.builder()
                 .baseUrl(url)
                 .build();
-        this.statusAggregator = statusAggregator;
     }
 
     @Override

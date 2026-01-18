@@ -19,6 +19,7 @@ import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.subcategory.SubcategoryCreateValidator;
 import ru.stroy1click.product.validator.subcategory.SubcategoryUpdateValidator;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -52,6 +53,7 @@ public class SubcategoryController {
         this.imageValidator.validateImage(image);
 
         this.subcategoryService.assignImage(id, image);
+
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
                         "info.subcategory.image.upload",
@@ -83,7 +85,7 @@ public class SubcategoryController {
 
     @PostMapping
     @Operation(summary = "Создать подкатегорию")
-    public ResponseEntity<String> create(@RequestBody @Valid SubcategoryDto subcategoryDto,
+    public ResponseEntity<SubcategoryDto> create(@RequestBody @Valid SubcategoryDto subcategoryDto,
                                          BindingResult bindingResult){
         if(bindingResult.hasFieldErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
@@ -91,14 +93,11 @@ public class SubcategoryController {
 
         this.createValidator.validate(subcategoryDto);
 
-        this.subcategoryService.create(subcategoryDto);
-        return ResponseEntity.ok(
-                this.messageSource.getMessage(
-                        "info.subcategory.create",
-                        null,
-                        Locale.getDefault()
-                )
-        );
+        SubcategoryDto createdSubcategory = this.subcategoryService.create(subcategoryDto);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/subcategories/" + createdSubcategory.getId()))
+                .body(createdSubcategory);
     }
 
     @PatchMapping("/{id}")
@@ -114,6 +113,7 @@ public class SubcategoryController {
         this.updateValidator.validate(subcategoryDto);
 
         this.subcategoryService.update(id, subcategoryDto);
+
         return ResponseEntity.ok(
                 this.messageSource.getMessage(
                         "info.subcategory.update",

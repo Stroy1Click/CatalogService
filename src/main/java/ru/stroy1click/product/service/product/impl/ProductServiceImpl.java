@@ -73,17 +73,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void create(ProductDto productDto) {
+    public ProductDto create(ProductDto productDto) {
         log.info("create {}", productDto);
 
         this.categoryService.get(productDto.getCategoryId());
         this.subcategoryService.get(productDto.getSubcategoryId());
         this.productTypeService.get(productDto.getProductTypeId());
 
-        Product createdProduct = this.productRepository.save(this.productMapper.toEntity(productDto));
-        this.outboxMessageService.save(this.productMapper.toDto(createdProduct), MessageType.PRODUCT_CREATED);
+        ProductDto createdProduct = this.productMapper.toDto(
+                this.productRepository.save(this.productMapper.toEntity(productDto))
+        );
+
+        this.outboxMessageService.save(createdProduct, MessageType.PRODUCT_CREATED);
 
         clearPaginationCache(productDto.getCategoryId(), productDto.getSubcategoryId(), productDto.getProductTypeId());
+
+        return createdProduct;
     }
 
     @Override

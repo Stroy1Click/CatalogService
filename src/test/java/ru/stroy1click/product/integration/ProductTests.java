@@ -26,6 +26,7 @@ public class ProductTests {
     @Test
     public void getProduct_ShouldReturnProduct() {
         ResponseEntity<ProductDto> response = this.testRestTemplate.getForEntity("/api/v1/products/1", ProductDto.class);
+
         Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
         Assertions.assertEquals("First Product", response.getBody().getTitle());
     }
@@ -33,9 +34,11 @@ public class ProductTests {
     @Test
     public void createProduct_ShouldReturnOk() {
         ProductDto dto = new ProductDto(null,"111 Product","Description",200.00,true,1,1,1);
-        ResponseEntity<String> response = this.testRestTemplate.
-                postForEntity("/api/v1/products", dto, String.class);
-        Assertions.assertEquals("Продукт создан", response.getBody());
+        ResponseEntity<ProductDto> response = this.testRestTemplate.
+                postForEntity("/api/v1/products", dto, ProductDto.class);
+
+        Assertions.assertTrue(response.getStatusCode().is2xxSuccessful());
+        Assertions.assertEquals("111 Product", response.getBody().getTitle());
     }
 
     @Test

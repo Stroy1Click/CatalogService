@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.exception.ValidationException;
-import ru.stroy1click.product.model.ProductAttributeFilter;
+import ru.stroy1click.product.model.PageResponse;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.product.ProductPaginationService;
 import ru.stroy1click.product.service.product.ProductService;
@@ -33,11 +32,12 @@ public class ProductPaginationServiceImpl implements ProductPaginationService {
     private final MessageSource messageSource;
 
     @Override
-    public Page<ProductDto> getProducts(Integer categoryId,
-                                        Integer subcategoryId,
-                                        Integer productType,
-                                        Pageable pageable){
+    public PageResponse<ProductDto> getProducts(Integer categoryId,
+                                                Integer subcategoryId,
+                                                Integer productType,
+                                                Pageable pageable){
         Page<Integer> productIds;
+
 
         if (Stream.of(categoryId, subcategoryId, productType).filter(Objects::nonNull).count() > 1) {
             throw new ValidationException(
@@ -67,6 +67,10 @@ public class ProductPaginationServiceImpl implements ProductPaginationService {
                 .map(this.productService::get)
                 .toList();
 
-        return new PageImpl<>(products, pageable, productIds.getTotalElements());
+        return new PageResponse<>(
+                products, pageable.getPageNumber(), pageable.getPageSize(),
+                productIds.getTotalElements(), productIds.getTotalPages(),
+                productIds.isLast()
+        );
     }
 }

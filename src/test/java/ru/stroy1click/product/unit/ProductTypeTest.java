@@ -187,7 +187,7 @@ class ProductTypeTest {
 
         verify(this.productTypeRepository).delete(this.productType);
         verify(this.outboxMessageService).save(1,MessageType.PRODUCT_TYPE_DELETED);
-        verify(this.cacheClear).clearProductsTypesOfSubcategory(5);
+        verify(this.cacheClear).clearProductTypesOfSubcategory(5);
     }
 
     @Test
@@ -218,7 +218,7 @@ class ProductTypeTest {
 
         assertThat(this.productType.getImage()).isEqualTo("newImage.png");
         verify(this.storageService).uploadImage(file);
-        verify(this.cacheClear).clearProductsTypesOfSubcategory(5);
+        verify(this.cacheClear).clearProductTypesOfSubcategory(5);
     }
 
     @Test
@@ -238,7 +238,7 @@ class ProductTypeTest {
 
         assertThat(this.productType.getImage()).isNull();
         verify(this.storageService).deleteImage("smart.png");
-        verify(this.cacheClear).clearProductsTypesOfSubcategory(5);
+        verify(this.cacheClear).clearProductTypesOfSubcategory(5);
     }
 
     @Test
@@ -250,7 +250,7 @@ class ProductTypeTest {
                 .doesNotThrowAnyException();
 
         verify(this.storageService).deleteImage("any.png");
-        verify(this.cacheClear).clearProductsTypesOfSubcategory(5);
+        verify(this.cacheClear).clearProductTypesOfSubcategory(5);
     }
 }
 

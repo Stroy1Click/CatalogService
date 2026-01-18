@@ -18,6 +18,7 @@ import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.product.type.ProductTypeCreateValidator;
 import ru.stroy1click.product.validator.product.type.ProductTypeUpdateValidator;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -76,7 +77,7 @@ public class ProductTypeController {
 
     @PostMapping
     @Operation(summary = "Создать тип продукта")
-    public ResponseEntity<String> create(@RequestBody @Valid ProductTypeDto productTypeDto,
+    public ResponseEntity<ProductTypeDto> create(@RequestBody @Valid ProductTypeDto productTypeDto,
                                          BindingResult bindingResult){
         if(bindingResult.hasFieldErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
@@ -84,14 +85,11 @@ public class ProductTypeController {
 
         this.createValidator.validate(productTypeDto);
 
-        this.productTypeService.create(productTypeDto);
-        return ResponseEntity.ok(
-                this.messageSource.getMessage(
-                        "info.product_type.create",
-                        null,
-                        Locale.getDefault()
-                )
-        );
+        ProductTypeDto createdProductType = this.productTypeService.create(productTypeDto);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/product-types/" + createdProductType.getId()))
+                .body(createdProductType);
     }
 
     @PatchMapping("/{id}")

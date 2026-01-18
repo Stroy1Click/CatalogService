@@ -15,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductImageDto;
 import ru.stroy1click.product.exception.ValidationException;
-import ru.stroy1click.product.model.ProductAttributeFilter;
+import ru.stroy1click.product.model.PageResponse;
 import ru.stroy1click.product.service.product.ProductImageService;
 import ru.stroy1click.product.service.product.ProductPaginationService;
 import ru.stroy1click.product.service.product.ProductService;
@@ -24,6 +24,7 @@ import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.product.ProductCreateValidator;
 import ru.stroy1click.product.validator.product.ProductUpdateValidator;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -92,20 +93,20 @@ public class ProductController {
 
     @GetMapping
     @Operation(summary = "Получить продукты с пагинацией")
-    public Page<ProductDto> getProducts(
+    public PageResponse<ProductDto> getProductsByPagination(
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestParam(value = "categoryId", required = false) Integer categoryId,
             @RequestParam(value = "subcategoryId", required = false) Integer subcategoryId,
             @RequestParam(value = "productTypeId", required = false) Integer productType
     ) {
-        return productPaginationService.getProducts(categoryId, subcategoryId, productType, PageRequest.of(page, size));
+        return this.productPaginationService.getProducts(categoryId, subcategoryId, productType, PageRequest.of(page, size));
     }
 
 
     @PostMapping
     @Operation(summary = "Создать продукт")
-    public ResponseEntity<String> create(@RequestBody @Valid ProductDto productDto,
+    public ResponseEntity<ProductDto> create(@RequestBody @Valid ProductDto productDto,
                                          BindingResult bindingResult){
         if(bindingResult.hasFieldErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
@@ -113,15 +114,11 @@ public class ProductController {
 
         this.createValidator.validate(productDto);
 
-        this.productService.create(productDto);
+        ProductDto createdProduct = this.productService.create(productDto);
 
-        return ResponseEntity.ok(
-                this.messageSource.getMessage(
-                        "info.product.create",
-                        null,
-                        Locale.getDefault()
-                )
-        );
+        return ResponseEntity
+                .created(URI.create("/api/v1/products/" + createdProduct.getId()))
+                .body(createdProduct);
     }
 
     @PatchMapping("/{id}")

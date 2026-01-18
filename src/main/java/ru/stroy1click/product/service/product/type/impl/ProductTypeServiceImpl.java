@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
+import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductTypeMapper;
@@ -21,7 +22,6 @@ import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -62,13 +62,19 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     @Override
     @Transactional
-    public void create(ProductTypeDto productTypeDto) {
+    @CacheEvict(value = "productTypesBySubcategory", key = "#productTypeDto.subcategoryId")
+    public ProductTypeDto create(ProductTypeDto productTypeDto) {
         log.info("create {}", productTypeDto);
 
         this.subcategoryService.get(productTypeDto.getSubcategoryId());
 
-        ProductType createdProductType = this.productTypeRepository.save(this.productTypeMapper.toEntity(productTypeDto));
-        this.outboxMessageService.save(this.productTypeMapper.toDto(createdProductType), MessageType.PRODUCT_TYPE_CREATED);
+        ProductTypeDto createdProductType = this.productTypeMapper.toDto(
+                this.productTypeRepository.save(this.productTypeMapper.toEntity(productTypeDto))
+        );
+
+        this.outboxMessageService.save(createdProductType, MessageType.PRODUCT_TYPE_CREATED);
+
+        return createdProductType;
     }
 
     @Override
@@ -76,7 +82,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "productType", key = "#id"),
-            @CacheEvict(value = "productsTypesOfSubcategory", key = "#productTypeDto.subcategoryId")
+            @CacheEvict(value = "productTypesBySubcategory", key = "#productTypeDto.subcategoryId")
     })
     public void update(Integer id, ProductTypeDto productTypeDto) {
         log.info("update {}, {}", id, productTypeDto);
@@ -118,7 +124,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
         this.productTypeRepository.delete(productType);
         this.outboxMessageService.save(id, MessageType.PRODUCT_TYPE_DELETED);
-        this.cacheClear.clearProductsTypesOfSubcategory(productType.getSubcategory().getId());
+        this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
 
     @Override
@@ -142,7 +148,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
         String imageName = this.storageService.uploadImage(image);
         productType.setImage(imageName);
 
-        this.cacheClear.clearProductsTypesOfSubcategory(productType.getSubcategory().getId());
+        this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
 
     @Override
@@ -161,7 +167,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
         this.storageService.deleteImage(imageName);
         productType.setImage(null);
 
-        this.cacheClear.clearProductsTypesOfSubcategory(productType.getSubcategory().getId());
+        this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
 
 }

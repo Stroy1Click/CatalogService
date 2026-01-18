@@ -44,10 +44,12 @@ class ProductTypeTests {
         ProductTypeDto dto = new ProductTypeDto(null, 1, "Image link", "Cheese");
         HttpEntity<ProductTypeDto> request = new HttpEntity<>(dto);
 
-        ResponseEntity<String> response = this.testRestTemplate.exchange("/api/v1/product-types", HttpMethod.POST, request, String.class);
+        ResponseEntity<ProductTypeDto> response = this.testRestTemplate.exchange(
+                "/api/v1/product-types", HttpMethod.POST, request, ProductTypeDto.class
+        );
 
-        Assertions.assertEquals(HttpStatus.OK, response.getStatusCode());
-        Assertions.assertEquals("Тип продукта создан", response.getBody());
+        Assertions.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        Assertions.assertEquals("Cheese", response.getBody().getTitle());
     }
 
     @Test

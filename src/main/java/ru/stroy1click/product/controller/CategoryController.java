@@ -20,6 +20,7 @@ import ru.stroy1click.product.util.ValidationErrorUtils;
 import ru.stroy1click.product.validator.category.CategoryCreateValidator;
 import ru.stroy1click.product.validator.category.CategoryUpdateValidator;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Locale;
 
@@ -90,7 +91,7 @@ public class CategoryController {
 
     @PostMapping
     @Operation(summary = "Создать категорию")
-    public ResponseEntity<String> create(@RequestBody @Valid CategoryDto categoryDto,
+    public ResponseEntity<CategoryDto> create(@RequestBody @Valid CategoryDto categoryDto,
                                          BindingResult bindingResult){
         if(bindingResult.hasFieldErrors()) throw new ValidationException(ValidationErrorUtils.collectErrorsToString(
                 bindingResult.getFieldErrors()
@@ -98,14 +99,11 @@ public class CategoryController {
 
         this.createValidator.validate(categoryDto);
 
-        this.categoryService.create(categoryDto);
-        return ResponseEntity.ok(
-                this.messageSource.getMessage(
-                        "info.category.create",
-                        null,
-                        Locale.getDefault()
-                )
-        );
+        CategoryDto createdCategory = this.categoryService.create(categoryDto);
+
+        return ResponseEntity
+                .created(URI.create("/api/v1/categories/" + createdCategory.getId()))
+                .body(createdCategory);
     }
 
     @PatchMapping("/{id}")

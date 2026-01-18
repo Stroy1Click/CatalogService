@@ -13,6 +13,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.exception.ValidationException;
+import ru.stroy1click.product.model.PageResponse;
 import ru.stroy1click.product.model.ProductAttributeFilter;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.product.ProductService;
@@ -59,7 +60,7 @@ class ProductPaginationTest {
         when(this.productRepository.findProductIdsByCategory_Id(1, pageable)).thenReturn(page);
         when(this.productService.get(anyInt())).thenReturn(this.sampleProduct);
 
-        Page<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
+        PageResponse<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
 
         assertEquals(3, result.getTotalElements());
         verify(this.productRepository).findProductIdsByCategory_Id(1, pageable);
@@ -75,9 +76,9 @@ class ProductPaginationTest {
 
         when(this.productRepository.findProductIdsByCategory_Id(1, pageable)).thenReturn(emptyPage);
 
-        Page<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
+        PageResponse<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
 
-        assertTrue(result.isEmpty());
+        assertEquals(result.getTotalElements(), 0L);
         verify(this.productRepository).findProductIdsByCategory_Id(1, pageable);
         verify(this.productService, never()).get(anyInt());
     }
@@ -135,9 +136,9 @@ class ProductPaginationTest {
         when(this.productRepository.findProductIdsByCategory_Id(1, pageable)).thenReturn(page);
         when(this.productService.get(anyInt())).thenReturn(this.sampleProduct);
 
-        Page<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
+        PageResponse<ProductDto> result = this.productPaginationService.getProducts(1, null, null, pageable);
 
-        assertEquals(5, result.getNumberOfElements());
+        assertEquals(5, result.getTotalElements());
         verify(this.productRepository).findProductIdsByCategory_Id(eq(1), any(Pageable.class));
 
         ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
