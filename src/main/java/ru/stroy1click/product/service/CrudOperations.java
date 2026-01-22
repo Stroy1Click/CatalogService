@@ -1,10 +1,12 @@
 package ru.stroy1click.product.service;
 
-import ru.stroy1click.product.dto.ProductDto;
+import java.util.List;
 
-public interface BaseService<ID, T> {
+public interface CrudOperations<ID, T> {
 
     T get(ID id);
+
+    List<T> getAll();
 
     T create(T dto);
 

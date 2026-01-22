@@ -9,12 +9,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductImageDto;
+import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.entity.Product;
+import ru.stroy1click.product.entity.ProductType;
+import ru.stroy1click.product.entity.Subcategory;
 import ru.stroy1click.product.exception.NotFoundException;
+import ru.stroy1click.product.mapper.CategoryMapper;
 import ru.stroy1click.product.mapper.ProductMapper;
+import ru.stroy1click.product.mapper.ProductTypeMapper;
+import ru.stroy1click.product.mapper.SubcategoryMapper;
 import ru.stroy1click.product.model.MessageType;
 import ru.stroy1click.product.repository.ProductRepository;
 import ru.stroy1click.product.service.category.CategoryService;
@@ -39,8 +44,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final ProductMapper productMapper;
-
-    private final CacheClear cacheClear;
 
     private final MessageSource messageSource;
 
@@ -72,7 +75,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "allProducts")
+    public List<ProductDto> getAll() {
+        return this.productMapper.toDto(this.productRepository.findAll());
+    }
+
+    @Override
     @Transactional
+    @CacheEvict(value = "allProducts", allEntries = true)
     public ProductDto create(ProductDto productDto) {
         log.info("create {}", productDto);
 
@@ -86,8 +96,6 @@ public class ProductServiceImpl implements ProductService {
 
         this.outboxMessageService.save(createdProduct, MessageType.PRODUCT_CREATED);
 
-        clearPaginationCache(productDto.getCategoryId(), productDto.getSubcategoryId(), productDto.getProductTypeId());
-
         return createdProduct;
     }
 
@@ -95,9 +103,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id"),
-            @CacheEvict(value = "clearPaginationOfProductsByCategory", key = "#productDto.categoryId"),
-            @CacheEvict(value = "clearPaginationOfProductsBySubcategory", key = "#productDto.subcategoryId"),
-            @CacheEvict(value = "clearPaginationOfProductsByProductType", key = "#productDto.productTypeId"),
+            @CacheEvict(value = "allProducts", allEntries = true)
     })
     public void update(Integer id, ProductDto productDto) {
         log.info("update {}, {}", id, productDto);
@@ -128,8 +134,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @CacheEvict(value = "product", key = "#id")
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "allProducts", allEntries = true)
+    })
     public void delete(Integer id) {
         log.info("delete {}", id);
 
@@ -144,10 +153,6 @@ public class ProductServiceImpl implements ProductService {
 
         this.productRepository.delete(product);
         this.outboxMessageService.save(id, MessageType.PRODUCT_DELETED);
-
-        clearPaginationCache(product.getCategory().getId(),
-                product.getSubcategory().getId(),
-                product.getProductType().getId());
     }
 
     @Override
@@ -159,7 +164,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "product", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "allProducts", allEntries = true)
+    })
     public void assignImages(Integer id, List<MultipartFile> images) {
         log.info("assignImage {}", id);
         Product product = this.productRepository.findById(id)
@@ -180,16 +188,14 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
 
         this.productImageService.create(imageNames);
-
-        clearPaginationCache(product.getCategory().getId(),
-                product.getSubcategory().getId(),
-                product.getProductType().getId());
-
     }
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "product", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id"),
+            @CacheEvict(value = "allProducts", allEntries = true)
+    })
     public void deleteImage(Integer id, String link) {
         log.info("deleteImage {} {}", id, link);
         Product product = this.productRepository.findById(id)
@@ -202,15 +208,5 @@ public class ProductServiceImpl implements ProductService {
                 ));
 
         this.productImageService.delete(link);
-
-        clearPaginationCache(product.getCategory().getId(),
-                product.getSubcategory().getId(),
-                product.getProductType().getId());
-    }
-
-    private void clearPaginationCache(Integer categoryId, Integer subcategoryId, Integer productTypeId){
-        this.cacheClear.clearPaginationOfProductsByCategory(categoryId);
-        this.cacheClear.clearPaginationOfProductsBySubcategory(subcategoryId);
-        this.cacheClear.clearPaginationOfProductsByProductType(productTypeId);
     }
 }

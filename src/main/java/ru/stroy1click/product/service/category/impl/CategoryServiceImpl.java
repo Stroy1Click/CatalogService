@@ -9,8 +9,8 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.CategoryDto;
-import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.exception.NotFoundException;
@@ -43,6 +43,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final StorageService storageService;
 
     private final OutboxMessageService outboxMessageService;
+
+    private final CacheClear cacheClear;
 
     @Override
     @Cacheable(value = "category", key = "#id")
@@ -114,6 +116,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Caching(evict = {
             @CacheEvict(value = "category", key = "#id"),
             @CacheEvict(value = "allCategories", allEntries = true),
+            @CacheEvict(value = "allSubcategories", allEntries = true),
+            @CacheEvict(value = "allProductTypes", allEntries = true),
+            @CacheEvict(value = "allProducts", allEntries = true),
             @CacheEvict(value = "subcategoriesOfCategory", key = "#id")
     })
     public void delete(Integer id) {

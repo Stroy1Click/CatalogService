@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductTypeDto;
@@ -41,9 +40,6 @@ class ProductTest {
 
     @Mock
     private ProductMapper productMapper;
-
-    @Mock
-    private CacheClear cacheClear;
 
     @Mock
     private MessageSource messageSource;
@@ -164,9 +160,6 @@ class ProductTest {
         this.productService.create(this.productDto);
 
         verify(this.productRepository).save(this.product);
-        verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
-        verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
-        verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
         verify(this.outboxMessageService)
                 .save(this.productDto, MessageType.PRODUCT_CREATED);
     }
@@ -281,9 +274,6 @@ class ProductTest {
         this.productService.delete(1);
 
         verify(this.productRepository).delete(this.product);
-        verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
-        verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
-        verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
         verify(this.outboxMessageService).save(1,MessageType.PRODUCT_DELETED);
     }
 
@@ -325,9 +315,6 @@ class ProductTest {
         this.productService.assignImages(1, List.of(image));
 
         verify(this.productImageService).create(anyList());
-        verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
-        verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
-        verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
     }
 
     @Test
@@ -346,9 +333,6 @@ class ProductTest {
         this.productService.deleteImage(1, "img1.png");
 
         verify(this.productImageService).delete("img1.png");
-        verify(this.cacheClear).clearPaginationOfProductsByCategory(1);
-        verify(this.cacheClear).clearPaginationOfProductsBySubcategory(2);
-        verify(this.cacheClear).clearPaginationOfProductsByProductType(3);
     }
 
     @Test

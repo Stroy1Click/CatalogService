@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
+import ru.stroy1click.product.dto.CategoryDto;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductTypeDto;
 import ru.stroy1click.product.dto.SubcategoryDto;
+import ru.stroy1click.product.entity.Category;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductTypeMapper;
 import ru.stroy1click.product.mapper.SubcategoryMapper;
@@ -66,8 +68,17 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     }
 
     @Override
+    @Cacheable(value = "allSubcategories")
+    public List<SubcategoryDto> getAll() {
+        return this.subcategoryMapper.toDto(this.subcategoryRepository.findAll());
+    }
+
+    @Override
     @Transactional
-    @CacheEvict(value = "subcategoriesOfCategory", key = "#subcategoryDto.categoryId")
+    @Caching(evict = {
+            @CacheEvict(value = "subcategoriesOfCategory", key = "#subcategoryDto.categoryId"),
+            @CacheEvict(value = "allSubcategories", allEntries = true)
+    })
     public SubcategoryDto create(SubcategoryDto subcategoryDto) {
         log.info("create {}", subcategoryDto);
 
@@ -86,7 +97,9 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "subcategory", key = "#id"),
-            @CacheEvict(value = "subcategoriesOfCategory", key = "#subcategoryDto.categoryId")
+            @CacheEvict(value = "subcategoriesOfCategory", key = "#subcategoryDto.categoryId"),
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#id"),
+            @CacheEvict(value = "allSubcategories", allEntries = true)
     })
     public void update(Integer id, SubcategoryDto subcategoryDto) {
         log.info("update {}, {}", id, subcategoryDto);
@@ -116,8 +129,10 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "subcategory", key = "#id"),
-            @CacheEvict(value = "clearPaginationOfProductsBySubcategory", key = "#id"),
-            @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#id"),
+            @CacheEvict(value = "allSubcategories", allEntries = true),
+            @CacheEvict(value = "allProductTypes", allEntries = true),
+            @CacheEvict(value = "allProducts", allEntries = true)
     })
     public void delete(Integer id) {
         log.info("delete {}", id);
@@ -142,7 +157,7 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     }
 
     @Override
-    @Cacheable(value = "productTypesBySubcategory", key = "#id")
+    @Cacheable(value = "productTypesOfSubcategory", key = "#id")
     public List<ProductTypeDto> getProductTypes(Integer id) {
         Subcategory subcategory = this.subcategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -158,7 +173,11 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "subcategory", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "allSubcategories", allEntries = true),
+            @CacheEvict(value = "subcategory", key = "#id"),
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
+    })
     public void assignImage(Integer id, MultipartFile image) {
         Subcategory subcategory = this.subcategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
@@ -176,7 +195,11 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "subcategory", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(value = "allSubcategories", allEntries = true),
+            @CacheEvict(value = "subcategory", key = "#id"),
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
+    })
     public void deleteImage(Integer id, String imageName) {
         Subcategory subcategory = this.subcategoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(

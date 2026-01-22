@@ -34,12 +34,12 @@ public class ProductPaginationServiceImpl implements ProductPaginationService {
     @Override
     public PageResponse<ProductDto> getProducts(Integer categoryId,
                                                 Integer subcategoryId,
-                                                Integer productType,
+                                                Integer productTypeId,
                                                 Pageable pageable){
         Page<Integer> productIds;
 
 
-        if (Stream.of(categoryId, subcategoryId, productType).filter(Objects::nonNull).count() > 1) {
+        if (Stream.of(categoryId, subcategoryId, productTypeId).filter(Objects::nonNull).count() > 1) {
             throw new ValidationException(
                     this.messageSource.getMessage(
                             "error.filter.invalid_combination",
@@ -51,8 +51,8 @@ public class ProductPaginationServiceImpl implements ProductPaginationService {
             productIds = this.productRepository.findProductIdsByCategory_Id(categoryId, pageable);
         } else if (subcategoryId != null) {
             productIds = this.productRepository.findProductIdsBySubcategory_Id(subcategoryId, pageable);
-        } else if (productType != null) {
-            productIds = this.productRepository.findProductIdsByProductType_Id(productType, pageable);
+        } else if (productTypeId != null) {
+            productIds = this.productRepository.findProductIdsByProductType_Id(productTypeId, pageable);
         } else {
             throw new ValidationException(
                     this.messageSource.getMessage(

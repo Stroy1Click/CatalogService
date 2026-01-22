@@ -26,7 +26,6 @@ public class RedissonConfig {
     @Bean(destroyMethod = "shutdown")
     public RedissonClient redissonClient() {
         Config config = new Config();
-        // Подключение к локальному Redis
         config.useSingleServer()
                 .setAddress("redis://%s:%d".formatted(this.host, this.port))
                 .setDatabase(0);
@@ -42,19 +41,15 @@ public class RedissonConfig {
 
         config.put("category", new CacheConfig(oneDayMillis, 0));
         config.put("allCategories", new CacheConfig(oneDayMillis, 0));
+        config.put("allSubcategories", new CacheConfig(oneDayMillis, 0));
+        config.put("allProductTypes", new CacheConfig(oneDayMillis, 0));
+        config.put("allProducts", new CacheConfig(oneDayMillis, 0));
         config.put("subcategory", new CacheConfig(oneDayMillis, 0));
         config.put("subcategoriesOfCategory", new CacheConfig(oneDayMillis, 0));
         config.put("product", new CacheConfig(oneDayMillis, 0));
         config.put("productImages", new CacheConfig(oneDayMillis, 0));
-        config.put("productAttributeValue", new CacheConfig(oneDayMillis, 0));
-        config.put("allProductAttributeValuesByProductId", new CacheConfig(oneDayMillis, 0));
-        config.put("clearPaginationOfProductsByCategory", new CacheConfig(oneDayMillis, 0));
-        config.put("clearPaginationOfProductsBySubcategory", new CacheConfig(oneDayMillis, 0));
         config.put("productType", new CacheConfig(oneDayMillis, 0));
         config.put("productTypesOfSubcategory", new CacheConfig(oneDayMillis, 0));
-        config.put("attribute", new CacheConfig(oneDayMillis, 0));
-        config.put("allAttributes", new CacheConfig(oneDayMillis, 0));
-        config.put("attributesByProductType", new CacheConfig(oneDayMillis, 0));
 
         return new RedissonSpringCacheManager(redissonClient, config);
     }

@@ -23,21 +23,6 @@ public class CacheClear {
         deleteCache("productTypesBySubcategory",subcategoryId);
     }
 
-    public void clearPaginationOfProductsByCategory(Integer categoryId){
-        log.info("clearPaginationOfProductsByCategory {}", categoryId);
-        deleteCache("clearPaginationOfProductsByCategory", categoryId); //TODO ERROR!
-    }
-
-    public void clearPaginationOfProductsBySubcategory(Integer subcategoryId){
-        log.info("clearPaginationOfProductsBySubcategory {}", subcategoryId);
-        deleteCache("clearPaginationOfProductsBySubcategory", subcategoryId);
-    }
-
-    public void clearPaginationOfProductsByProductType(Integer productTypeId){
-        log.info("clearPaginationOfProductsByProductType {}", productTypeId);
-        deleteCache("clearPaginationOfProductsByProductType", productTypeId);
-    }
-
     public void clearProductImages(Integer productId){
         log.info("clearProductImages {productId}");
         deleteCache("productImages", productId);

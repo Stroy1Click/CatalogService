@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.cache.CacheClear;
 import ru.stroy1click.product.dto.ProductDto;
 import ru.stroy1click.product.dto.ProductTypeDto;
+import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.NotFoundException;
 import ru.stroy1click.product.mapper.ProductTypeMapper;
 import ru.stroy1click.product.entity.ProductType;
@@ -22,6 +23,7 @@ import ru.stroy1click.product.service.storage.StorageService;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
 import ru.stroy1click.product.service.subcategory.SubcategoryService;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -61,8 +63,17 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     }
 
     @Override
+    @Cacheable(value = "allProductTypes")
+    public List<ProductTypeDto> getAll() {
+        return this.productTypeMapper.toDto(this.productTypeRepository.findAll());
+    }
+
+    @Override
     @Transactional
-    @CacheEvict(value = "productTypesBySubcategory", key = "#productTypeDto.subcategoryId")
+    @Caching(evict = {
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#productTypeDto.subcategoryId"),
+            @CacheEvict(value = "allProductTypes", allEntries = true)
+    })
     public ProductTypeDto create(ProductTypeDto productTypeDto) {
         log.info("create {}", productTypeDto);
 
@@ -78,11 +89,11 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     }
 
     @Override
-    @CacheEvict(value = "productType", key = "#id")
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "productType", key = "#id"),
-            @CacheEvict(value = "productTypesBySubcategory", key = "#productTypeDto.subcategoryId")
+            @CacheEvict(value = "productTypesOfSubcategory", key = "#productTypeDto.subcategoryId"),
+            @CacheEvict(value = "allProductTypes", allEntries = true)
     })
     public void update(Integer id, ProductTypeDto productTypeDto) {
         log.info("update {}, {}", id, productTypeDto);
@@ -109,8 +120,12 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     }
 
     @Override
-    @CacheEvict(value = "productType", key = "#id")
     @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "productType", key = "#id"),
+            @CacheEvict(value = "allProductTypes", allEntries = true),
+            @CacheEvict(value = "allProducts", allEntries = true)
+    })
     public void delete(Integer id) {
         log.info("delete {}", id);
         ProductType productType = this.productTypeRepository.findById(id)
@@ -124,6 +139,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
         this.productTypeRepository.delete(productType);
         this.outboxMessageService.save(id, MessageType.PRODUCT_TYPE_DELETED);
+
         this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
 
@@ -134,7 +150,10 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     @Override
     @Transactional
-    @CacheEvict(cacheNames = "productType", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "productType", key = "#id"),
+            @CacheEvict(value = "allProductTypes", allEntries = true)
+    })
     public void assignImage(Integer id, MultipartFile image) {
         log.info("assignImage {}", id);
         ProductType productType = this.productTypeRepository.findById(id)
@@ -153,7 +172,10 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "productType", key = "#id")
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "productType", key = "#id"),
+            @CacheEvict(value = "allProductTypes", allEntries = true)
+    })
     public void deleteImage(Integer id, String imageName) {
         log.info("deleteImage {}, {}", id, imageName);
         ProductType productType = this.productTypeRepository.findById(id)
@@ -169,5 +191,4 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
         this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
-
 }
