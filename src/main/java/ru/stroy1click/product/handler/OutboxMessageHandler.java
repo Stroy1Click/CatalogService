@@ -25,7 +25,7 @@ public class OutboxMessageHandler {
 
     private final OutboxMessageService outboxMessageService;
 
-    @Scheduled(fixedDelay = 3_600_000) // 1 час
+    @Scheduled(fixedDelay = 3_600_00) // 1 час
     public void handle(){
         log.info("handle");
         List<OutboxMessageDto> outboxMessages = this.outboxMessageService.getCreatedAndRetryableMessages();
@@ -46,9 +46,6 @@ public class OutboxMessageHandler {
                     } else {
                         outboxMessageService.setFailedStatus(outboxMessage.getId(), e.getMessage());
                     }
-                } catch (OutboxMessageException e){
-                    log.error("error ", e);
-                    this.outboxMessageService.setFailedStatus(outboxMessage.getId(),e.getMessage());
                 } catch (Exception e){
                     log.error("error ", e);
                     outboxMessageService.setFailedStatus(outboxMessage.getId(), e.getMessage());

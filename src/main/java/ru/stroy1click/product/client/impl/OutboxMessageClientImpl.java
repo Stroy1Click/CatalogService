@@ -33,7 +33,7 @@ public class OutboxMessageClientImpl implements OutboxMessageClient {
 
     @Override
     public OutboxPublishResult send(OutboxMessageDto outboxMessage) {
-        log.info("registration");
+        log.info("send");
         try {
             return this.restClient.post()
                     .body(outboxMessage)

@@ -50,6 +50,9 @@ otel:
 server:
   port: 7070
 
+url:
+  search: http://localhost:5050/sync/events
+
 redisson:
   host: 127.0.0.1
   port: 6379

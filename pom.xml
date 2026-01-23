@@ -34,6 +34,9 @@
         <resilience4j.version>2.3.0</resilience4j.version>
         <otel.version>2.22.0</otel.version>
         <redisson.version>3.36.0</redisson.version>
+        <docker.image.prefix>stroy1click</docker.image.prefix>
+        <docker.image.name>product</docker.image.name>
+        <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
     </properties>
     <dependencies>
         <dependency>
@@ -176,6 +179,29 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <verbose>true</verbose>
+                    <images>
+                        <image>
+                            <name>${docker.image.prefix}/${docker.image.name}</name>
+                            <build>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                                <assembly>
+                                    <descriptorRef>artifact</descriptorRef>
+                                </assembly>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                            </build>
+                        </image>
+                    </images>
                 </configuration>
             </plugin>
         </plugins>

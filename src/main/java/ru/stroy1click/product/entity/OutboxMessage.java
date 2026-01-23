@@ -35,5 +35,4 @@ public class OutboxMessage {
     private String errorMessage;
 
     private int retryAttempts;
-
 }

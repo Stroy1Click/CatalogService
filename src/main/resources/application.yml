@@ -11,7 +11,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    show-sql: true
+    show-sql: false
     open-in-view: false
   datasource:
     url: jdbc:postgresql://localhost:5432/stroy1click
@@ -56,7 +56,7 @@ redisson:
   port: 6379
 
 url:
-  search: http://localhost:4045/api/v1/outbox
+  search: http://localhost:5050/sync/events
 
 s3:
   access-key: b0a085fad6914c2abd49b762ee2263e2
@@ -68,7 +68,7 @@ resilience4j:
   ratelimiter:
     instances:
       storageLimiter:
-        limitForPeriod: 100
+        limitForPeriod: 30
         limitRefreshPeriod: 1s
       productLimiter:
         limitForPeriod: 30
