@@ -54,6 +54,8 @@ server:
 redisson:
   host: 127.0.0.1
   port: 6379
+  username: default
+  password: password
 
 url:
   search: http://localhost:5050/sync/events

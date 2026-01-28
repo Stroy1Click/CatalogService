@@ -46,6 +46,12 @@ public class SubcategoryController {
         return this.subcategoryService.get(id);
     }
 
+    @GetMapping
+    @Operation(summary = "Получить все подкатегории")
+    public List<SubcategoryDto> getAll(){
+        return this.subcategoryService.getAll();
+    }
+
     @PostMapping("/{id}/image")
     @Operation(summary = "Загрузить изображение подкатегории")
     public ResponseEntity<String> assignImage(@PathVariable("id") Integer id,

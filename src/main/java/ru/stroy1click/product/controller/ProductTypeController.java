@@ -11,6 +11,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.product.dto.ProductTypeDto;
+import ru.stroy1click.product.dto.SubcategoryDto;
 import ru.stroy1click.product.exception.ValidationException;
 import ru.stroy1click.product.service.product.type.ProductTypeService;
 import ru.stroy1click.product.util.ImageValidatorUtils;
@@ -43,6 +44,12 @@ public class ProductTypeController {
     @Operation(summary = "Получить тип продукта")
     public ProductTypeDto get(@PathVariable("id") Integer id){
         return this.productTypeService.get(id);
+    }
+
+    @GetMapping
+    @Operation(summary = "Получить все типы продуктов")
+    public List<ProductTypeDto> getAll(){
+        return this.productTypeService.getAll();
     }
 
     @PostMapping("/{id}/image")
