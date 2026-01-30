@@ -1,6 +1,6 @@
 spring:
   application:
-    name: Product-Service
+    name: Catalog-Service
   profiles:
     active: dev
   config:
@@ -58,7 +58,7 @@ redisson:
   password: password
 
 url:
-  search: http://localhost:5050/sync/events
+  search: http://localhost:4045/api/v1/search
 
 s3:
   access-key: b0a085fad6914c2abd49b762ee2263e2
