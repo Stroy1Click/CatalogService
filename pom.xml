@@ -35,7 +35,7 @@
         <otel.version>2.22.0</otel.version>
         <redisson.version>3.36.0</redisson.version>
         <docker.image.prefix>stroy1click</docker.image.prefix>
-        <docker.image.name>product</docker.image.name>
+        <docker.image.name>catalog</docker.image.name>
         <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
     </properties>
     <dependencies>
@@ -189,7 +189,7 @@
                     <verbose>true</verbose>
                     <images>
                         <image>
-                            <name>${docker.image.prefix}/${docker.image.name}-name</name>
+                            <name>${docker.image.prefix}/${docker.image.name}-arm64</name>
                             <build>
                                 <dockerFileDir>${project.basedir}</dockerFileDir>
                                 <assembly>
