@@ -16,7 +16,7 @@ import ru.stroy1click.catalog.entity.Category;
 import ru.stroy1click.catalog.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.CategoryMapper;
 import ru.stroy1click.catalog.mapper.SubcategoryMapper;
-import ru.stroy1click.catalog.model.MessageType;
+import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.CategoryRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
 import ru.stroy1click.catalog.service.outbox.OutboxMessageService;

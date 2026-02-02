@@ -8,7 +8,7 @@ import ru.stroy1click.catalog.client.OutboxMessageClient;
 import ru.stroy1click.catalog.dto.OutboxMessageDto;
 import ru.stroy1click.catalog.exception.ServiceErrorResponseException;
 import ru.stroy1click.catalog.exception.ServiceUnavailableException;
-import ru.stroy1click.catalog.model.OutboxPublishResult;
+import ru.stroy1click.catalog.entity.OutboxPublishResult;
 import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 
 import java.util.List;

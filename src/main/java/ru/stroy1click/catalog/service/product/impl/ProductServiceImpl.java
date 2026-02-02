@@ -15,7 +15,7 @@ import ru.stroy1click.catalog.dto.ProductImageDto;
 import ru.stroy1click.catalog.entity.Product;
 import ru.stroy1click.catalog.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductMapper;
-import ru.stroy1click.catalog.model.MessageType;
+import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
 import ru.stroy1click.catalog.service.outbox.OutboxMessageService;

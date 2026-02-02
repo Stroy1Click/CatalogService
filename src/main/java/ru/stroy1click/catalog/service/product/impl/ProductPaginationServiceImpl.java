@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.exception.ValidationException;
-import ru.stroy1click.catalog.model.PageResponse;
+import ru.stroy1click.catalog.dto.PageResponse;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.product.ProductPaginationService;
 import ru.stroy1click.catalog.service.product.ProductService;

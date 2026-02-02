@@ -10,8 +10,8 @@ import ru.stroy1click.catalog.dto.OutboxMessageDto;
 import ru.stroy1click.catalog.entity.OutboxMessage;
 import ru.stroy1click.catalog.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.OutboxMessageMapper;
-import ru.stroy1click.catalog.model.MessageStatus;
-import ru.stroy1click.catalog.model.MessageType;
+import ru.stroy1click.catalog.entity.MessageStatus;
+import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.OutboxMessageRepository;
 import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 

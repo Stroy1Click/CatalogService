@@ -13,7 +13,7 @@ import ru.stroy1click.catalog.dto.OutboxMessageDto;
 import ru.stroy1click.catalog.exception.OutboxMessageException;
 import ru.stroy1click.catalog.exception.ServiceErrorResponseException;
 import ru.stroy1click.catalog.exception.ServiceUnavailableException;
-import ru.stroy1click.catalog.model.OutboxPublishResult;
+import ru.stroy1click.catalog.entity.OutboxPublishResult;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.dto.ProductImageDto;
 import ru.stroy1click.catalog.exception.ValidationException;
-import ru.stroy1click.catalog.model.PageResponse;
+import ru.stroy1click.catalog.dto.PageResponse;
 import ru.stroy1click.catalog.service.product.ProductImageService;
 import ru.stroy1click.catalog.service.product.ProductPaginationService;
 import ru.stroy1click.catalog.service.product.ProductService;

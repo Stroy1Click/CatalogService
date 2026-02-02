@@ -1,7 +1,7 @@
 package ru.stroy1click.catalog.service.outbox;
 
 import ru.stroy1click.catalog.dto.OutboxMessageDto;
-import ru.stroy1click.catalog.model.MessageType;
+import ru.stroy1click.catalog.entity.MessageType;
 
 import java.util.List;
 

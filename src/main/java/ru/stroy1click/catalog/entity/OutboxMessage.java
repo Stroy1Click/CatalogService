@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.stroy1click.catalog.model.MessageStatus;
-import ru.stroy1click.catalog.model.MessageType;
 
 import java.time.LocalDateTime;
 

@@ -1,4 +1,4 @@
-package ru.stroy1click.catalog.model;
+package ru.stroy1click.catalog.entity;
 
 public enum MessageStatus {
 
