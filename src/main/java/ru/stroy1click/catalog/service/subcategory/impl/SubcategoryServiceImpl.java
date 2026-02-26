@@ -12,16 +12,18 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
-import ru.stroy1click.catalog.exception.NotFoundException;
+import ru.stroy1click.common.event.SubcategoryCreatedEvent;
+import ru.stroy1click.common.event.SubcategoryDeletedEvent;
+import ru.stroy1click.common.event.SubcategoryUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductTypeMapper;
 import ru.stroy1click.catalog.mapper.SubcategoryMapper;
 import ru.stroy1click.catalog.entity.Subcategory;
-import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.SubcategoryRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
-import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
 import java.util.Locale;
@@ -47,7 +49,13 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
     private final CategoryService categoryService;
 
-    private final OutboxMessageService outboxMessageService;
+    private final OutboxEventService outboxEventService;
+
+    private final static String SUBCATEGORY_CREATED_TOPIC = "subcategory-created-events";
+
+    private final static String SUBCATEGORY_UPDATED_TOPIC = "subcategory-updated-events";
+
+    private final static String SUBCATEGORY_DELETED_TOPIC = "subcategory-deleted-events";
 
     @Override
     @Cacheable(value = "subcategory", key = "#id")
@@ -67,6 +75,8 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Override
     @Cacheable(value = "allSubcategories")
     public List<SubcategoryDto> getAll() {
+        log.info("getAll");
+
         return this.subcategoryMapper.toDto(this.subcategoryRepository.findAll());
     }
 
@@ -85,7 +95,14 @@ public class SubcategoryServiceImpl implements SubcategoryService {
                 this.subcategoryRepository.save(this.subcategoryMapper.toEntity(subcategoryDto))
         );
 
-        this.outboxMessageService.save(createdSubcategory, MessageType.SUBCATEGORY_CREATED);
+        SubcategoryCreatedEvent event = SubcategoryCreatedEvent.builder()
+                .id(createdSubcategory.getId())
+                .categoryId(createdSubcategory.getCategoryId())
+                .title(createdSubcategory.getTitle())
+                .image(createdSubcategory.getImage())
+                .build();
+
+        this.outboxEventService.save(SUBCATEGORY_CREATED_TOPIC, event);
 
         return createdSubcategory;
     }
@@ -105,12 +122,19 @@ public class SubcategoryServiceImpl implements SubcategoryService {
             Subcategory updatedSubcategory = Subcategory.builder()
                     .id(id)
                     .title(subcategoryDto.getTitle())
+                    .image(subcategory.getImage())
                     .category(subcategory.getCategory())
                     .products(subcategory.getProducts())
                     .build();
 
+            SubcategoryUpdatedEvent event = SubcategoryUpdatedEvent.builder()
+                    .id(updatedSubcategory.getId())
+                    .title(updatedSubcategory.getTitle())
+                    .image(updatedSubcategory.getImage())
+                    .build();
+
             this.subcategoryRepository.save(updatedSubcategory);
-            this.outboxMessageService.save(this.subcategoryMapper.toDto(updatedSubcategory), MessageType.SUBCATEGORY_UPDATED);
+            this.outboxEventService.save(SUBCATEGORY_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -142,7 +166,9 @@ public class SubcategoryServiceImpl implements SubcategoryService {
                         )
                 ));
 
-        this.outboxMessageService.save(id, MessageType.SUBCATEGORY_DELETED);
+        SubcategoryDeletedEvent event = new SubcategoryDeletedEvent(id);
+
+        this.outboxEventService.save(SUBCATEGORY_DELETED_TOPIC, event);
         this.cacheClear.clearSubcategoriesOfCategory(subcategory.getCategory().getId());
         this.subcategoryRepository.deleteById(id);
     }

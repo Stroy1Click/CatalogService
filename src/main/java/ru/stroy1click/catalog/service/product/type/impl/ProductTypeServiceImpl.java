@@ -11,15 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
-import ru.stroy1click.catalog.exception.NotFoundException;
+import ru.stroy1click.common.event.ProductTypeCreatedEvent;
+import ru.stroy1click.common.event.ProductTypeDeletedEvent;
+import ru.stroy1click.common.event.ProductTypeUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductTypeMapper;
 import ru.stroy1click.catalog.entity.ProductType;
-import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.ProductTypeRepository;
-import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.product.type.ProductTypeService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +45,13 @@ public class ProductTypeServiceImpl implements ProductTypeService {
 
     private final SubcategoryService subcategoryService;
 
-    private final OutboxMessageService outboxMessageService;
+    private final OutboxEventService outboxEventService;
+
+    private final static String PRODUCT_TYPE_CREATED_TOPIC = "product-type-created-events";
+
+    private final static String PRODUCT_TYPE_UPDATED_TOPIC = "product-type-updated-events";
+
+    private final static String PRODUCT_TYPE_DELETED_TOPIC = "product-type-deleted-events";
 
     @Override
     @Cacheable(value = "productType", key = "#id")
@@ -63,6 +71,8 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     @Override
     @Cacheable(value = "allProductTypes")
     public List<ProductTypeDto> getAll() {
+        log.info("getAll");
+
         return this.productTypeMapper.toDto(this.productTypeRepository.findAll());
     }
 
@@ -81,7 +91,14 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                 this.productTypeRepository.save(this.productTypeMapper.toEntity(productTypeDto))
         );
 
-        this.outboxMessageService.save(createdProductType, MessageType.PRODUCT_TYPE_CREATED);
+        ProductTypeCreatedEvent event = ProductTypeCreatedEvent.builder()
+                .id(createdProductType.getId())
+                .subcategoryId(createdProductType.getSubcategoryId())
+                .title(createdProductType.getTitle())
+                .image(createdProductType.getImage())
+                .build();
+
+        this.outboxEventService.save(PRODUCT_TYPE_CREATED_TOPIC, event);
 
         return createdProductType;
     }
@@ -104,8 +121,14 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                     .products(productType.getProducts())
                     .build();
 
+            ProductTypeUpdatedEvent event = ProductTypeUpdatedEvent.builder()
+                    .id(updatedProductType.getId())
+                    .title(updatedProductType.getTitle())
+                    .image(updatedProductType.getImage())
+                    .build();
+
             this.productTypeRepository.save(updatedProductType);
-            this.outboxMessageService.save(this.productTypeMapper.toDto(updatedProductType), MessageType.PRODUCT_TYPE_UPDATED);
+            this.outboxEventService.save(PRODUCT_TYPE_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -126,6 +149,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     })
     public void delete(Integer id) {
         log.info("delete {}", id);
+
         ProductType productType = this.productTypeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -135,8 +159,10 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                         )
                 ));
 
+        ProductTypeDeletedEvent event = new ProductTypeDeletedEvent(id);
+
         this.productTypeRepository.delete(productType);
-        this.outboxMessageService.save(id, MessageType.PRODUCT_TYPE_DELETED);
+        this.outboxEventService.save(PRODUCT_TYPE_DELETED_TOPIC, event);
 
         this.cacheClear.clearProductTypesOfSubcategory(productType.getSubcategory().getId());
     }
@@ -154,6 +180,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     })
     public void assignImage(Integer id, MultipartFile image) {
         log.info("assignImage {}", id);
+
         ProductType productType = this.productTypeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -162,6 +189,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                                 Locale.getDefault()
                         )
                 ));
+
         String imageName = this.storageService.uploadImage(image);
         productType.setImage(imageName);
 
@@ -176,6 +204,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
     })
     public void deleteImage(Integer id, String imageName) {
         log.info("deleteImage {}, {}", id, imageName);
+
         ProductType productType = this.productTypeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(
                         this.messageSource.getMessage(
@@ -184,6 +213,7 @@ public class ProductTypeServiceImpl implements ProductTypeService {
                                 Locale.getDefault()
                         )
                 ));
+
         this.storageService.deleteImage(imageName);
         productType.setImage(null);
 

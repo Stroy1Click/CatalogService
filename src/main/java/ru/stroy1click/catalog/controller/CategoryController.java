@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
-import ru.stroy1click.catalog.exception.ValidationException;
+import ru.stroy1click.common.exception.ValidationException;
 import ru.stroy1click.catalog.service.category.CategoryService;
-import ru.stroy1click.catalog.util.ImageValidatorUtils;
-import ru.stroy1click.catalog.util.ValidationErrorUtils;
+import ru.stroy1click.common.util.ValidationErrorUtils;
 import ru.stroy1click.catalog.validator.category.CategoryCreateValidator;
 import ru.stroy1click.catalog.validator.category.CategoryUpdateValidator;
+import ru.stroy1click.common.validator.ImageValidator;
 
 import java.net.URI;
 import java.util.List;
@@ -39,7 +39,7 @@ public class CategoryController {
 
     private final MessageSource messageSource;
 
-    private final ImageValidatorUtils imageValidator;
+    private final ImageValidator imageValidator;
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить категорию")

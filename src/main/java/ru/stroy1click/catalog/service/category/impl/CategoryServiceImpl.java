@@ -9,18 +9,19 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
 import ru.stroy1click.catalog.entity.Category;
-import ru.stroy1click.catalog.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.CategoryMapper;
 import ru.stroy1click.catalog.mapper.SubcategoryMapper;
-import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.CategoryRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
-import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 import ru.stroy1click.catalog.service.storage.StorageService;
+import ru.stroy1click.common.event.CategoryCreatedEvent;
+import ru.stroy1click.common.event.CategoryDeletedEvent;
+import ru.stroy1click.common.event.CategoryUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
+import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
 import java.util.Locale;
@@ -42,9 +43,13 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final StorageService storageService;
 
-    private final OutboxMessageService outboxMessageService;
+    private final OutboxEventService outboxEventService;
 
-    private final CacheClear cacheClear;
+    private final static String CATEGORY_CREATED_TOPIC = "category-created-events";
+
+    private final static String CATEGORY_UPDATED_TOPIC = "category-updated-events";
+
+    private final static String CATEGORY_DELETED_TOPIC = "category-deleted-events";
 
     @Override
     @Cacheable(value = "category", key = "#id")
@@ -64,6 +69,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Cacheable(value = "allCategories")
     public List<CategoryDto> getAll() {
+        log.info("getAll");
+
         return this.categoryMapper.toDto(this.categoryRepository.findAll());
     }
 
@@ -77,7 +84,13 @@ public class CategoryServiceImpl implements CategoryService {
                 this.categoryRepository.save(this.categoryMapper.toEntity(categoryDto))
         );
 
-        this.outboxMessageService.save(createdCategory, MessageType.CATEGORY_CREATED);
+        CategoryCreatedEvent event = CategoryCreatedEvent.builder()
+                .id(createdCategory.getId())
+                .title(createdCategory.getTitle())
+                .image(createdCategory.getImage())
+                .build();
+
+        this.outboxEventService.save(CATEGORY_CREATED_TOPIC, event);
 
         return createdCategory;
     }
@@ -99,7 +112,14 @@ public class CategoryServiceImpl implements CategoryService {
                     .build();
 
             this.categoryRepository.save(updateCategory);
-            this.outboxMessageService.save(this.categoryMapper.toDto(updateCategory), MessageType.CATEGORY_UPDATED);
+
+            CategoryUpdatedEvent event = CategoryUpdatedEvent.builder()
+                    .id(updateCategory.getId())
+                    .title(updateCategory.getTitle())
+                    .image(updateCategory.getImage())
+                    .build();
+
+            this.outboxEventService.save(CATEGORY_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -133,8 +153,11 @@ public class CategoryServiceImpl implements CategoryService {
                         )
                 ));
 
+        CategoryDeletedEvent event = new CategoryDeletedEvent(id);
+
         this.categoryRepository.delete(category);
-        this.outboxMessageService.save(id, MessageType.CATEGORY_DELETED);
+
+        this.outboxEventService.save(CATEGORY_DELETED_TOPIC, event);
     }
 
     @Override

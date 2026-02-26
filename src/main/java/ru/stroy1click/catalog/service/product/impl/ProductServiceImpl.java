@@ -9,21 +9,22 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.dto.ProductImageDto;
 import ru.stroy1click.catalog.entity.Product;
-import ru.stroy1click.catalog.exception.NotFoundException;
+import ru.stroy1click.common.event.ProductCreatedEvent;
+import ru.stroy1click.common.event.ProductDeletedEvent;
+import ru.stroy1click.common.event.ProductUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductMapper;
-import ru.stroy1click.catalog.entity.MessageType;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
-import ru.stroy1click.catalog.service.outbox.OutboxMessageService;
 import ru.stroy1click.catalog.service.product.ProductImageService;
 import ru.stroy1click.catalog.service.product.ProductService;
 import ru.stroy1click.catalog.service.product.type.ProductTypeService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
 import java.util.Locale;
@@ -52,7 +53,13 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductTypeService productTypeService;
 
-    private final OutboxMessageService outboxMessageService;
+    private final OutboxEventService outboxEventService;
+
+    private final static String PRODUCT_CREATED_TOPIC = "product-created-events";
+
+    private final static String PRODUCT_UPDATED_TOPIC = "product-updated-events";
+
+    private final static String PRODUCT_DELETED_TOPIC = "product-deleted-events";
 
     @Override
     @Cacheable(value = "product", key = "#id")
@@ -72,6 +79,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Cacheable(value = "allProducts")
     public List<ProductDto> getAll() {
+        log.info("getAll");
+
         return this.productMapper.toDto(this.productRepository.findAll());
     }
 
@@ -81,7 +90,8 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto create(ProductDto productDto) {
         log.info("create {}", productDto);
 
-        CategoryDto categoryDto  = this.categoryService.get(productDto.getCategoryId());
+        //проверка существований сущностей
+        this.categoryService.get(productDto.getCategoryId());
         this.subcategoryService.get(productDto.getSubcategoryId());
         this.productTypeService.get(productDto.getProductTypeId());
 
@@ -89,7 +99,19 @@ public class ProductServiceImpl implements ProductService {
                 this.productRepository.save(this.productMapper.toEntity(productDto))
         );
 
-        this.outboxMessageService.save(createdProduct, MessageType.PRODUCT_CREATED);
+        ProductCreatedEvent event = ProductCreatedEvent.builder()
+                .id(createdProduct.getId())
+                .title(createdProduct.getTitle())
+                .description(createdProduct.getDescription())
+                .inStock(createdProduct.getInStock())
+                .price(createdProduct.getPrice())
+                .unit(createdProduct.getUnit())
+                .categoryId(createdProduct.getCategoryId())
+                .subcategoryId(createdProduct.getSubcategoryId())
+                .productTypeId(createdProduct.getProductTypeId())
+                .build();
+
+        this.outboxEventService.save(PRODUCT_CREATED_TOPIC, event);
 
         return createdProduct;
     }
@@ -107,6 +129,7 @@ public class ProductServiceImpl implements ProductService {
             Product updatedProduct = Product.builder()
                     .id(id)
                     .title(productDto.getTitle())
+                    .unit(productDto.getUnit())
                     .description(productDto.getDescription())
                     .price(productDto.getPrice())
                     .inStock(productDto.getInStock())
@@ -115,8 +138,17 @@ public class ProductServiceImpl implements ProductService {
                     .productType(product.getProductType())
                     .build();
 
+            ProductUpdatedEvent event = ProductUpdatedEvent.builder()
+                    .id(updatedProduct.getId())
+                    .title(updatedProduct.getTitle())
+                    .description(updatedProduct.getDescription())
+                    .inStock(updatedProduct.getInStock())
+                    .price(updatedProduct.getPrice())
+                    .unit(updatedProduct.getUnit())
+                    .build();
+
             this.productRepository.save(updatedProduct);
-            this.outboxMessageService.save(this.productMapper.toDto(updatedProduct), MessageType.PRODUCT_UPDATED);
+            this.outboxEventService.save(PRODUCT_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(
                     this.messageSource.getMessage(
@@ -146,8 +178,10 @@ public class ProductServiceImpl implements ProductService {
                         )
                 ));
 
+        ProductDeletedEvent event = new ProductDeletedEvent(id);
+
         this.productRepository.delete(product);
-        this.outboxMessageService.save(id, MessageType.PRODUCT_DELETED);
+        this.outboxEventService.save(PRODUCT_DELETED_TOPIC, event);
     }
 
     @Override

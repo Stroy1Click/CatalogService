@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import ru.stroy1click.catalog.exception.*;
+import ru.stroy1click.common.exception.*;
 
 import java.util.Locale;
 
@@ -76,24 +76,6 @@ public class AdviceController {
                         Locale.getDefault()
                 )
         );
-        return problemDetail;
-    }
-
-    @ExceptionHandler(ServiceUnavailableException.class)
-    public ProblemDetail handleException(ServiceUnavailableException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.SERVICE_UNAVAILABLE,
-                this.messageSource.getMessage(
-                        "error.details.service_unavailable",
-                        null,
-                        Locale.getDefault()
-                )
-        );
-        problemDetail.setTitle(this.messageSource.getMessage(
-                "error.title.service_unavailable",
-                null,
-                Locale.getDefault()
-        ));
         return problemDetail;
     }
 
