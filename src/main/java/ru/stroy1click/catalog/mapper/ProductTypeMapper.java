@@ -5,6 +5,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.entity.ProductType;
+import ru.stroy1click.common.mapper.Mappable;
 
 import java.util.List;
 

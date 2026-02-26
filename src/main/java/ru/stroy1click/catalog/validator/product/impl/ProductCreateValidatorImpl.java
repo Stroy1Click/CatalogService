@@ -5,7 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.catalog.dto.ProductDto;
-import ru.stroy1click.catalog.exception.AlreadyExistsException;
+import ru.stroy1click.common.exception.AlreadyExistsException;
 import ru.stroy1click.catalog.service.product.ProductService;
 import ru.stroy1click.catalog.validator.product.ProductCreateValidator;
 

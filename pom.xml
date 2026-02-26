@@ -37,6 +37,8 @@
         <docker.image.prefix>stroy1click</docker.image.prefix>
         <docker.image.name>catalog</docker.image.name>
         <docker-maven-plugin.version>0.45.0</docker-maven-plugin.version>
+        <common.version>0.0.1-SNAPSHOT</common.version>
+        <outbox.core.version>0.0.1-SNAPSHOT</outbox.core.version>
     </properties>
     <dependencies>
         <dependency>
@@ -91,9 +93,38 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.stroy1click</groupId>
+            <artifactId>common</artifactId>
+            <version>${common.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ru.stroy1click</groupId>
+            <artifactId>outbox-core</artifactId>
+            <version>${outbox.core.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>kafka</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
