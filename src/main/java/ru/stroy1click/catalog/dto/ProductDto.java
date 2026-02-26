@@ -1,16 +1,15 @@
 package ru.stroy1click.catalog.dto;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import ru.stroy1click.common.dto.Unit;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Data
 @Builder
@@ -31,8 +30,11 @@ public class ProductDto implements Serializable {
     private String description;
 
     @NotNull(message = "{validation.productdto.price.not_null}")
-    @Positive(message = "{validation.productdto.price.positive}")
-    private Double price;
+    @DecimalMin(value = "1", message = "{validation.productdto.price.min}")
+    private BigDecimal price;
+
+    @NotNull(message = "{validation.productdto.unit.not_null}")
+    private Unit unit;
 
     @NotNull(message = "{validation.productdto.in_stock.not_null}")
     private Boolean inStock;

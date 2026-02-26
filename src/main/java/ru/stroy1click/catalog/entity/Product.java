@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.stroy1click.common.dto.Unit;
+
+import java.math.BigDecimal;
 
 @Data
 @Table(schema = "catalog", name = "products")
@@ -22,7 +25,10 @@ public class Product {
 
     private String description;
 
-    private Double price;
+    private BigDecimal price;
+
+    @Enumerated(EnumType.STRING)
+    private Unit unit;
 
     private Boolean inStock;
 

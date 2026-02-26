@@ -13,19 +13,21 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.dto.ProductImageDto;
-import ru.stroy1click.catalog.exception.ValidationException;
+import ru.stroy1click.common.exception.ValidationException;
 import ru.stroy1click.catalog.dto.PageResponse;
 import ru.stroy1click.catalog.service.product.ProductImageService;
 import ru.stroy1click.catalog.service.product.ProductPaginationService;
 import ru.stroy1click.catalog.service.product.ProductService;
-import ru.stroy1click.catalog.util.ImageValidatorUtils;
-import ru.stroy1click.catalog.util.ValidationErrorUtils;
+import ru.stroy1click.common.util.ValidationErrorUtils;
 import ru.stroy1click.catalog.validator.product.ProductCreateValidator;
 import ru.stroy1click.catalog.validator.product.ProductUpdateValidator;
+import ru.stroy1click.common.validator.ImageValidator;
 
 import java.net.URI;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +48,7 @@ public class ProductController {
 
     private final ProductImageService productImageService;
 
-    private final ImageValidatorUtils imageValidator;
+    private final ImageValidator imageValidator;
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить продукт")
@@ -97,9 +99,19 @@ public class ProductController {
             @RequestParam(value = "size", defaultValue = "20") Integer size,
             @RequestParam(value = "categoryId", required = false) Integer categoryId,
             @RequestParam(value = "subcategoryId", required = false) Integer subcategoryId,
-            @RequestParam(value = "productTypeId", required = false) Integer productType
+            @RequestParam(value = "productTypeId", required = false) Integer productTypeId
     ) {
-        return this.productPaginationService.getProducts(categoryId, subcategoryId, productType, PageRequest.of(page, size));
+        if (Stream.of(categoryId, subcategoryId, productTypeId).filter(Objects::nonNull).count() > 1) {
+            throw new ValidationException(
+                    this.messageSource.getMessage(
+                            "error.filter.invalid_combination",
+                            null,
+                            Locale.getDefault()
+                    )
+            );
+        }
+
+        return this.productPaginationService.getProducts(categoryId, subcategoryId, productTypeId, PageRequest.of(page, size));
     }
 
 

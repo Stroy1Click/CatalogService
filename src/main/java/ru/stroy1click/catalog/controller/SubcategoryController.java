@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
-import ru.stroy1click.catalog.exception.ValidationException;
+import ru.stroy1click.common.exception.ValidationException;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
-import ru.stroy1click.catalog.util.ImageValidatorUtils;
-import ru.stroy1click.catalog.util.ValidationErrorUtils;
+import ru.stroy1click.common.util.ValidationErrorUtils;
 import ru.stroy1click.catalog.validator.subcategory.SubcategoryCreateValidator;
 import ru.stroy1click.catalog.validator.subcategory.SubcategoryUpdateValidator;
+import ru.stroy1click.common.validator.ImageValidator;
 
 import java.net.URI;
 import java.util.List;
@@ -38,7 +38,7 @@ public class SubcategoryController {
 
     private final MessageSource messageSource;
 
-    private final ImageValidatorUtils imageValidator;
+    private final ImageValidator imageValidator;
 
     @GetMapping("/{id}")
     @Operation(summary = "Получить подкатегорию")

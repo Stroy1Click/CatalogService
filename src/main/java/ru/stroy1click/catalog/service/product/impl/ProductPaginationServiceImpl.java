@@ -7,17 +7,15 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.stroy1click.catalog.dto.ProductDto;
-import ru.stroy1click.catalog.exception.ValidationException;
 import ru.stroy1click.catalog.dto.PageResponse;
+import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.product.ProductPaginationService;
 import ru.stroy1click.catalog.service.product.ProductService;
+import ru.stroy1click.common.exception.ValidationException;
 
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -38,16 +36,7 @@ public class ProductPaginationServiceImpl implements ProductPaginationService {
                                                 Pageable pageable){
         Page<Integer> productIds;
 
-
-        if (Stream.of(categoryId, subcategoryId, productTypeId).filter(Objects::nonNull).count() > 1) {
-            throw new ValidationException(
-                    this.messageSource.getMessage(
-                            "error.filter.invalid_combination",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
-        } else if (categoryId != null) {
+        if (categoryId != null) {
             productIds = this.productRepository.findProductIdsByCategory_Id(categoryId, pageable);
         } else if (subcategoryId != null) {
             productIds = this.productRepository.findProductIdsBySubcategory_Id(subcategoryId, pageable);

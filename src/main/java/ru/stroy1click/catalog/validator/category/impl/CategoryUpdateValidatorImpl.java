@@ -6,7 +6,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.entity.Category;
-import ru.stroy1click.catalog.exception.AlreadyExistsException;
+import ru.stroy1click.common.exception.AlreadyExistsException;
 import ru.stroy1click.catalog.service.category.CategoryService;
 import ru.stroy1click.catalog.validator.category.CategoryUpdateValidator;
 
