@@ -114,20 +114,14 @@ public class ProductTypeServiceImpl implements ProductTypeService {
         log.info("update {}, {}", id, productTypeDto);
 
         this.productTypeRepository.findById(id).ifPresentOrElse(productType -> {
-            ProductType updatedProductType = ProductType.builder()
-                    .id(id)
-                    .title(productTypeDto.getTitle())
-                    .subcategory(productType.getSubcategory())
-                    .products(productType.getProducts())
-                    .build();
+            productType.setTitle(productTypeDto.getTitle());
 
             ProductTypeUpdatedEvent event = ProductTypeUpdatedEvent.builder()
-                    .id(updatedProductType.getId())
-                    .title(updatedProductType.getTitle())
-                    .image(updatedProductType.getImage())
+                    .id(productType.getId())
+                    .title(productType.getTitle())
+                    .image(productType.getImage())
                     .build();
 
-            this.productTypeRepository.save(updatedProductType);
             this.outboxEventService.save(PRODUCT_TYPE_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(

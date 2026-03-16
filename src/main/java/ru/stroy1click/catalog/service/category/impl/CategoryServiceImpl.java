@@ -105,18 +105,12 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("update {}, {}", id, categoryDto);
 
         this.categoryRepository.findById(id).ifPresentOrElse(category -> {
-            Category updateCategory = Category.builder()
-                    .id(id)
-                    .title(categoryDto.getTitle())
-                    .products(category.getProducts())
-                    .build();
-
-            this.categoryRepository.save(updateCategory);
+            category.setTitle(categoryDto.getTitle());
 
             CategoryUpdatedEvent event = CategoryUpdatedEvent.builder()
-                    .id(updateCategory.getId())
-                    .title(updateCategory.getTitle())
-                    .image(updateCategory.getImage())
+                    .id(category.getId())
+                    .title(category.getTitle())
+                    .image(category.getImage())
                     .build();
 
             this.outboxEventService.save(CATEGORY_UPDATED_TOPIC, event);
