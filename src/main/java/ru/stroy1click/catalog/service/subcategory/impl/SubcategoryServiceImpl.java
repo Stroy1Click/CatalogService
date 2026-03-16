@@ -119,21 +119,14 @@ public class SubcategoryServiceImpl implements SubcategoryService {
         log.info("update {}, {}", id, subcategoryDto);
 
         this.subcategoryRepository.findById(id).ifPresentOrElse(subcategory -> {
-            Subcategory updatedSubcategory = Subcategory.builder()
-                    .id(id)
-                    .title(subcategoryDto.getTitle())
-                    .image(subcategory.getImage())
-                    .category(subcategory.getCategory())
-                    .products(subcategory.getProducts())
-                    .build();
+            subcategory.setTitle(subcategoryDto.getTitle());
 
             SubcategoryUpdatedEvent event = SubcategoryUpdatedEvent.builder()
-                    .id(updatedSubcategory.getId())
-                    .title(updatedSubcategory.getTitle())
-                    .image(updatedSubcategory.getImage())
+                    .id(subcategory.getId())
+                    .title(subcategory.getTitle())
+                    .image(subcategory.getImage())
                     .build();
 
-            this.subcategoryRepository.save(updatedSubcategory);
             this.outboxEventService.save(SUBCATEGORY_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(

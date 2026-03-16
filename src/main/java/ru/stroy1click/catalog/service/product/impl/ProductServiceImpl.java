@@ -126,28 +126,21 @@ public class ProductServiceImpl implements ProductService {
         log.info("update {}, {}", id, productDto);
 
         this.productRepository.findById(id).ifPresentOrElse(product -> {
-            Product updatedProduct = Product.builder()
-                    .id(id)
-                    .title(productDto.getTitle())
-                    .unit(productDto.getUnit())
-                    .description(productDto.getDescription())
-                    .price(productDto.getPrice())
-                    .inStock(productDto.getInStock())
-                    .category(product.getCategory())
-                    .subcategory(product.getSubcategory())
-                    .productType(product.getProductType())
-                    .build();
+            product.setTitle(productDto.getTitle());
+            product.setUnit(productDto.getUnit());
+            product.setDescription(productDto.getDescription());
+            product.setPrice(productDto.getPrice());
+            product.setInStock(productDto.getInStock());
 
             ProductUpdatedEvent event = ProductUpdatedEvent.builder()
-                    .id(updatedProduct.getId())
-                    .title(updatedProduct.getTitle())
-                    .description(updatedProduct.getDescription())
-                    .inStock(updatedProduct.getInStock())
-                    .price(updatedProduct.getPrice())
-                    .unit(updatedProduct.getUnit())
+                    .id(product.getId())
+                    .title(product.getTitle())
+                    .description(product.getDescription())
+                    .inStock(product.getInStock())
+                    .price(product.getPrice())
+                    .unit(product.getUnit())
                     .build();
 
-            this.productRepository.save(updatedProduct);
             this.outboxEventService.save(PRODUCT_UPDATED_TOPIC, event);
         }, () -> {
             throw new NotFoundException(
