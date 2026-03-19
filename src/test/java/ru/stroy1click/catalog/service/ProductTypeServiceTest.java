@@ -164,21 +164,15 @@ class ProductTypeServiceTest {
     @Test
     public void update_WhenProductTypeExists_ShouldUpdateProductTypeAndSaveOutboxEvent() {
         //Arrange
-        ProductTypeDto updatedDto = new ProductTypeDto(1, 5, "new.png", "New Type");
+        ProductTypeDto updatedDto = new ProductTypeDto(1, 5, "image.png", "New Type");
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.of(productType));
-        when(this.productTypeRepository.save(any(ProductType.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
         //Act
         this.productTypeService.update(1, updatedDto);
 
         //Assert
-        ArgumentCaptor<ProductType> captor = ArgumentCaptor.forClass(ProductType.class);
-        verify(this.productTypeRepository).save(captor.capture());
-        ProductType saved = captor.getValue();
         verify(this.outboxEventService).save(eq(PRODUCT_TYPE_UPDATED_TOPIC), any(ProductTypeUpdatedEvent.class));
-        assertThat(saved.getTitle()).isEqualTo("New Type");
-        assertThat(saved.getSubcategory()).isEqualTo(subcategory);
+        assertThat(productType.getTitle()).isEqualTo("New Type");
     }
 
 

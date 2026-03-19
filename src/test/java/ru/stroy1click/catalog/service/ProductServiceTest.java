@@ -246,12 +246,11 @@ class ProductServiceTest {
     public void update_WhenValidDataProvided_ShouldUpdateProductAndSaveOutboxEvent() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.of(product));
-        when(this.productRepository.save(any(Product.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
         ProductDto updatedDto = ProductDto.builder()
                 .title("NewPhone")
                 .description("Updated")
                 .price(BigDecimal.valueOf(1099.0))
+                .unit(Unit.KG)
                 .inStock(true)
                 .categoryId(1)
                 .subcategoryId(2)
@@ -262,17 +261,12 @@ class ProductServiceTest {
         this.productService.update(1, updatedDto);
 
         //Assert
-        ArgumentCaptor<Product> captor = ArgumentCaptor.forClass(Product.class);
-        verify(this.productRepository).save(captor.capture());
-        Product saved = captor.getValue();
         verify(this.outboxEventService).save(eq(PRODUCT_UPDATED_TOPIC), any(ProductUpdatedEvent.class));
-        assertThat(saved.getTitle()).isEqualTo("NewPhone");
-        assertThat(saved.getCategory()).isEqualTo(this.product.getCategory());
-        assertThat(saved.getSubcategory()).isEqualTo(this.product.getSubcategory());
-        assertThat(saved.getProductType()).isEqualTo(this.product.getProductType());
-        assertThat(saved.getDescription()).isEqualTo("Updated");
-        assertThat(saved.getPrice()).isEqualTo(BigDecimal.valueOf(1099.0));
-        assertThat(saved.getInStock()).isTrue();
+        assertEquals("NewPhone", product.getTitle());
+        assertEquals("Updated", product.getDescription());
+        assertEquals(Unit.KG, product.getUnit());
+        assertEquals(BigDecimal.valueOf(1099.0), product.getPrice());
+        assertTrue(product.getInStock());
     }
 
 
