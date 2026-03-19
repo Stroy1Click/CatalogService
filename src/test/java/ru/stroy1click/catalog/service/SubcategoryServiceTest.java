@@ -169,20 +169,15 @@ class SubcategoryServiceTest {
     @Test
     public void update_WhenSubcategoryExists_ShouldUpdateSubcategoryAndSaveOutboxEvent() {
         //Arrange
-        SubcategoryDto updatedDto = new SubcategoryDto(1, 10, "new.png", "Phones");
+        SubcategoryDto updatedDto = new SubcategoryDto(1, 10, "image.png", "New Phones");
         when(this.subcategoryRepository.findById(1)).thenReturn(Optional.of(subcategory));
-        when(this.subcategoryRepository.save(any(Subcategory.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
         //Act
         this.subcategoryService.update(1, updatedDto);
 
         //Assert
-        ArgumentCaptor<Subcategory> captor = ArgumentCaptor.forClass(Subcategory.class);
-        verify(this.subcategoryRepository).save(captor.capture());
-        Subcategory saved = captor.getValue();
         verify(this.outboxEventService).save(eq(SUBCATEGORY_UPDATED_TOPIC), any(SubcategoryUpdatedEvent.class));
-        assertThat(saved.getTitle()).isEqualTo("Phones");
+        assertEquals("New Phones",subcategory.getTitle());
     }
 
 

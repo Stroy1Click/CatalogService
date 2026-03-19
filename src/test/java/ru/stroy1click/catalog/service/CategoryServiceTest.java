@@ -152,18 +152,15 @@ class CategoryServiceTest {
     @Test
     public void update_WhenValidData_ShouldUpdateExistingCategoryAndSaveOutboxEvent() {
         //Arrange
-        CategoryDto updatedDto = new CategoryDto(1, "new.png", "New Title");
+        CategoryDto updatedDto = new CategoryDto(1, "image.png", "New Title");
         when(this.categoryRepository.findById(1)).thenReturn(Optional.of(category));
-        when(this.categoryRepository.save(any(Category.class)))
-                .thenAnswer(invocation -> invocation.getArgument(0));
 
         //Act
         this.categoryService.update(1, updatedDto);
 
         //Assert
-        ArgumentCaptor<Category> categoryCaptor = ArgumentCaptor.forClass(Category.class);
-        verify(this.categoryRepository).save(categoryCaptor.capture());
         verify(this.outboxEventService).save(eq(CATEGORY_UPDATED_TOPIC), any(CategoryUpdatedEvent.class));
+        assertEquals("New Title",category.getTitle());
     }
 
     @Test
