@@ -19,7 +19,7 @@ public class SubcategoryCreateValidatorImpl implements SubcategoryCreateValidato
     public void validate(SubcategoryDto subcategoryDto){
         log.info("validate {}", subcategoryDto);
         if(this.subcategoryService.getByTitle(subcategoryDto.getTitle()).isPresent()){
-            throw ExceptionUtils.alreadyExists("error.subcategory.create.validate", subcategoryDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.subcategory.create.validate", null);
         }
     }
 }

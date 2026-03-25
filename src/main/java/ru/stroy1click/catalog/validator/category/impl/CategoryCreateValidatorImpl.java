@@ -19,7 +19,7 @@ public class CategoryCreateValidatorImpl implements CategoryCreateValidator {
     public void validate(CategoryDto categoryDto){
         log.info("validate {}", categoryDto);
         if(this.categoryService.getByTitle(categoryDto.getTitle()).isPresent()) {
-            throw ExceptionUtils.alreadyExists("error.category.create.validate", categoryDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.category.create.validate", null);
         }
     }
 }

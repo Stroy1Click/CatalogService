@@ -19,7 +19,7 @@ public class ProductTypeCreateValidatorImpl implements ProductTypeCreateValidato
     public void validate(ProductTypeDto productTypeDto){
         log.info("validate {}", productTypeDto);
         if(this.productTypeService.getByTitle(productTypeDto.getTitle()).isPresent()){
-            throw ExceptionUtils.alreadyExists("error.product_type.create.validate", productTypeDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.product_type.create.validate", null);
         }
     }
 }

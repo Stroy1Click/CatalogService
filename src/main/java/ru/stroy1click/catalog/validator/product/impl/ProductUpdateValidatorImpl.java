@@ -26,7 +26,7 @@ public class ProductUpdateValidatorImpl implements ProductUpdateValidator {
 
         if(foundProduct.isPresent() && !Objects.equals(productDto.getId(), foundProduct.get().getId())
                 && productDto.getTitle().equalsIgnoreCase(foundProduct.get().getTitle())){
-            throw ExceptionUtils.alreadyExists("error.product.update.validate", productDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.product.update.validate", null);
         }
     }
 }
