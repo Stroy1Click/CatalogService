@@ -26,7 +26,7 @@ public class CategoryUpdateValidatorImpl implements CategoryUpdateValidator {
 
         if(foundCategory.isPresent() && !Objects.equals(categoryDto.getId(), foundCategory.get().getId())
                 && categoryDto.getTitle().equalsIgnoreCase(foundCategory.get().getTitle())){
-            throw ExceptionUtils.alreadyExists("error.category.update.validate", categoryDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.category.update.validate", null);
         }
     }
 }

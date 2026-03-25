@@ -19,7 +19,7 @@ public class ProductCreateValidatorImpl implements ProductCreateValidator {
     public void validate(ProductDto productDto){
         log.info("validate {}", productDto);
         if(this.productService.getByTitle(productDto.getTitle()).isPresent()){
-            throw ExceptionUtils.alreadyExists("error.product.create.validate", productDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.product.create.validate", null);
         }
     }
 }

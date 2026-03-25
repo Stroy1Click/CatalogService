@@ -49,7 +49,7 @@ otel:
     disabled: true
 
 server:
-  port: 7070
+  port: 7071
 
 redisson:
   host: 127.0.0.1

@@ -26,7 +26,7 @@ public class SubcategoryUpdateValidatorImpl implements SubcategoryUpdateValidato
 
         if(foundSubcategory.isPresent() && !Objects.equals(subcategoryDto.getId(), foundSubcategory.get().getId())
                 && subcategoryDto.getTitle().equalsIgnoreCase(foundSubcategory.get().getTitle())){
-            throw ExceptionUtils.alreadyExists("error.subcategory.update.validate", subcategoryDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.subcategory.update.validate", null);
         }
     }
 }

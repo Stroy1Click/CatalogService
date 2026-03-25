@@ -26,7 +26,7 @@ public class ProductTypeUpdateValidatorImpl implements ProductTypeUpdateValidato
 
         if(foundSubcategory.isPresent() && !Objects.equals(productTypeDto.getId(), foundSubcategory.get().getId())
                 && productTypeDto.getTitle().equalsIgnoreCase(foundSubcategory.get().getTitle())){
-            throw ExceptionUtils.alreadyExists("error.product_type.update.validate", productTypeDto.getTitle());
+            throw ExceptionUtils.alreadyExists("error.product_type.update.validate", null);
         }
     }
 }
