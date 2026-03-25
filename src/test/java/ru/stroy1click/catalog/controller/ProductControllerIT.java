@@ -227,20 +227,21 @@ public class ProductControllerIT {
     }
 
     @Test
-    public void deleteImage_WhenProductExists_ShouldReturnOk() {
+    public void deleteImage_WhenProductExistsAndImageDoesNotExist_ShouldReturnOk() {
         //Arrange
+        String notExistsLink = "image.png";
         doNothing().when(this.storageService).deleteImage(anyString());
 
         //Act
         ResponseEntity<ProblemDetail> response = this.testRestTemplate.exchange(
-                "/api/v1/products/1/images?link=image.png",
+                "/api/v1/products/1/images?link=" + notExistsLink,
                 HttpMethod.DELETE,
                 HttpEntity.EMPTY,
                 ProblemDetail.class
         );
 
         //Assert
-        assertEquals("Изображение продукта не найдено", response.getBody().getDetail());
+        assertEquals("Изображение продукта %s не найдено".formatted(notExistsLink), response.getBody().getDetail());
     }
 
     @Test

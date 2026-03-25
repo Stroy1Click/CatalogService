@@ -48,13 +48,16 @@ class CategoryControllerIT {
 
     @Test
     public void get_WhenCategoryDoesNotExist_ShouldThrowNotFoundException() {
+        //Arrange
+        int notExistsId = 99999;
+
         //Act
         ResponseEntity<ProblemDetail> response = this.testRestTemplate
-                .getForEntity("/api/v1/categories/99999", ProblemDetail.class);
+                .getForEntity("/api/v1/categories/" + notExistsId, ProblemDetail.class);
 
         //Assert
         assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals("Категория не найдена", response.getBody().getDetail());
+        assertEquals("Категория с id %d не найдена".formatted(notExistsId), response.getBody().getDetail());
     }
 
 

@@ -3,29 +3,30 @@ package ru.stroy1click.catalog.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
 import ru.stroy1click.catalog.entity.ProductType;
 import ru.stroy1click.catalog.entity.Subcategory;
-import ru.stroy1click.common.event.ProductTypeCreatedEvent;
-import ru.stroy1click.common.event.ProductTypeDeletedEvent;
-import ru.stroy1click.common.event.ProductTypeUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductTypeMapper;
 import ru.stroy1click.catalog.repository.ProductTypeRepository;
 import ru.stroy1click.catalog.service.product.type.impl.ProductTypeServiceImpl;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.common.event.ProductTypeCreatedEvent;
+import ru.stroy1click.common.event.ProductTypeDeletedEvent;
+import ru.stroy1click.common.event.ProductTypeUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
-import java.util.*;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -40,9 +41,6 @@ class ProductTypeServiceTest {
 
     @Mock
     private CacheClear cacheClear;
-
-    @Mock
-    private MessageSource messageSource;
 
     @Mock
     private StorageService storageService;
@@ -117,13 +115,11 @@ class ProductTypeServiceTest {
     public void get_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productTypeRepository.findById(99)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("ProductType not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productTypeService.get(99))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("ProductType not found");
+                .hasMessage("error.product_type.not_found");
     }
 
     @Test
@@ -180,13 +176,11 @@ class ProductTypeServiceTest {
     public void update_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("ProductType not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productTypeService.update(1, productTypeDto))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("ProductType not found");
+                .hasMessage("error.product_type.not_found");
     }
 
     @Test
@@ -207,8 +201,6 @@ class ProductTypeServiceTest {
     public void delete_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("ProductType not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productTypeService.delete(1))
@@ -249,8 +241,6 @@ class ProductTypeServiceTest {
         //Arrange
         MultipartFile file = mock(MultipartFile.class);
         when(this.productTypeRepository.findById(99)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("ProductType not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productTypeService.assignImage(99, file))
@@ -275,10 +265,9 @@ class ProductTypeServiceTest {
     public void deleteImage_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productTypeRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("ProductType not found");
 
         //Act & Assert
-       assertThrows(NotFoundException.class, () -> this.productTypeService.deleteImage(1, "smart.png"));
+       assertThrows(NotFoundException.class,
+               () -> this.productTypeService.deleteImage(1, "smart.png"));
     }
 }

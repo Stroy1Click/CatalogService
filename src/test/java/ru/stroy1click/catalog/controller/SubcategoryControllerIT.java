@@ -50,13 +50,16 @@ class SubcategoryControllerIT {
 
     @Test
     public void get_WhenSubcategoryDoesNotExist_ShouldThrowNotFoundException() {
+        //Arrange
+        int notExistId = 99999;
+
         //Act
         ResponseEntity<ProblemDetail> response = this.testRestTemplate
-                .getForEntity("/api/v1/subcategories/99999", ProblemDetail.class);
+                .getForEntity("/api/v1/subcategories/" + notExistId, ProblemDetail.class);
 
         //Assert
         Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-        Assertions.assertEquals("Подкатегория не найдена", response.getBody().getDetail());
+        Assertions.assertEquals("Подкатегория с id %d не найдена".formatted(notExistId), response.getBody().getDetail());
     }
 
     @Test

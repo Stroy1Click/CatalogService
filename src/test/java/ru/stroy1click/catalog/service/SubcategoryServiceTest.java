@@ -3,9 +3,9 @@ package ru.stroy1click.catalog.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.CategoryDto;
@@ -14,21 +14,23 @@ import ru.stroy1click.catalog.dto.SubcategoryDto;
 import ru.stroy1click.catalog.entity.Category;
 import ru.stroy1click.catalog.entity.ProductType;
 import ru.stroy1click.catalog.entity.Subcategory;
-import ru.stroy1click.common.event.SubcategoryCreatedEvent;
-import ru.stroy1click.common.event.SubcategoryDeletedEvent;
-import ru.stroy1click.common.event.SubcategoryUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductTypeMapper;
 import ru.stroy1click.catalog.mapper.SubcategoryMapper;
 import ru.stroy1click.catalog.repository.SubcategoryRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.impl.SubcategoryServiceImpl;
+import ru.stroy1click.common.event.SubcategoryCreatedEvent;
+import ru.stroy1click.common.event.SubcategoryDeletedEvent;
+import ru.stroy1click.common.event.SubcategoryUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -46,9 +48,6 @@ class SubcategoryServiceTest {
 
     @Mock
     private CacheClear cacheClear;
-
-    @Mock
-    private MessageSource messageSource;
 
     @Mock
     private StorageService storageService;
@@ -122,13 +121,11 @@ class SubcategoryServiceTest {
     public void get_WhenSubcategoryDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.subcategoryRepository.findById(99)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Subcategory not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.subcategoryService.get(99))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Subcategory not found");
+                .hasMessage("error.subcategory.not_found");
     }
 
     @Test
@@ -185,13 +182,11 @@ class SubcategoryServiceTest {
     public void update_WhenSubcategoryDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.subcategoryRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Subcategory not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.subcategoryService.update(1, subcategoryDto))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Subcategory not found");
+                .hasMessage("error.subcategory.not_found");
     }
 
     @Test
@@ -212,8 +207,6 @@ class SubcategoryServiceTest {
     public void delete_WhenSubcategoryDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.subcategoryRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Subcategory not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.subcategoryService.delete(1))
@@ -301,11 +294,10 @@ class SubcategoryServiceTest {
     public void getSubcategories_ShouldThrowNotFoundException_WhenCategoryNotFound() {
         //Arrange
         when(this.subcategoryRepository.findById(999)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any())).thenReturn("Subcategory not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.subcategoryService.getProductTypes(999))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Subcategory not found");
+                .hasMessage("error.subcategory.not_found");
     }
 }

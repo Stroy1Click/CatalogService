@@ -2,15 +2,13 @@ package ru.stroy1click.catalog.validator.subcategory.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
 import ru.stroy1click.catalog.entity.Subcategory;
-import ru.stroy1click.common.exception.AlreadyExistsException;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
 import ru.stroy1click.catalog.validator.subcategory.SubcategoryUpdateValidator;
+import ru.stroy1click.common.util.ExceptionUtils;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,8 +19,6 @@ public class SubcategoryUpdateValidatorImpl implements SubcategoryUpdateValidato
 
     private final SubcategoryService subcategoryService;
 
-    private final MessageSource messageSource;
-
     @Override
     public void validate(SubcategoryDto subcategoryDto){
         log.info("validate {}", subcategoryDto);
@@ -30,13 +26,7 @@ public class SubcategoryUpdateValidatorImpl implements SubcategoryUpdateValidato
 
         if(foundSubcategory.isPresent() && !Objects.equals(subcategoryDto.getId(), foundSubcategory.get().getId())
                 && subcategoryDto.getTitle().equalsIgnoreCase(foundSubcategory.get().getTitle())){
-            throw new AlreadyExistsException(
-                    this.messageSource.getMessage(
-                            "error.subcategory.update.validate",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
+            throw ExceptionUtils.alreadyExists("error.subcategory.update.validate", subcategoryDto.getTitle());
         }
     }
 }

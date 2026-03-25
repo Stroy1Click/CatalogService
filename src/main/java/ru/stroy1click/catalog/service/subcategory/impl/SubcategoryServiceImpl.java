@@ -5,28 +5,26 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
-import ru.stroy1click.common.event.SubcategoryCreatedEvent;
-import ru.stroy1click.common.event.SubcategoryDeletedEvent;
-import ru.stroy1click.common.event.SubcategoryUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
+import ru.stroy1click.catalog.entity.Subcategory;
 import ru.stroy1click.catalog.mapper.ProductTypeMapper;
 import ru.stroy1click.catalog.mapper.SubcategoryMapper;
-import ru.stroy1click.catalog.entity.Subcategory;
 import ru.stroy1click.catalog.repository.SubcategoryRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.common.event.SubcategoryCreatedEvent;
+import ru.stroy1click.common.event.SubcategoryDeletedEvent;
+import ru.stroy1click.common.event.SubcategoryUpdatedEvent;
+import ru.stroy1click.common.util.ExceptionUtils;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -42,8 +40,6 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     private final ProductTypeMapper productTypeMapper;
 
     private final CacheClear cacheClear;
-
-    private final MessageSource messageSource;
 
     private final StorageService storageService;
 
@@ -62,14 +58,10 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     public SubcategoryDto get(Integer id) {
         log.info("get {}", id);
 
-        return this.subcategoryMapper.toDto(this.subcategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.subcategory.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                )));
+        Subcategory subcategory = this.subcategoryRepository.findById(id)
+                .orElseThrow(() -> ExceptionUtils.notFound("error.subcategory.not_found",id));
+
+        return this.subcategoryMapper.toDto(subcategory);
     }
 
     @Override
@@ -129,13 +121,7 @@ public class SubcategoryServiceImpl implements SubcategoryService {
 
             this.outboxEventService.save(SUBCATEGORY_UPDATED_TOPIC, event);
         }, () -> {
-            throw new NotFoundException(
-                    this.messageSource.getMessage(
-                            "error.subcategory.not_found",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
+            throw ExceptionUtils.notFound("error.subcategory.not_found", id);
         });
     }
 
@@ -151,13 +137,7 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     public void delete(Integer id) {
         log.info("delete {}", id);
         Subcategory subcategory = this.subcategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.subcategory.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.subcategory.not_found",id));
 
         SubcategoryDeletedEvent event = new SubcategoryDeletedEvent(id);
 
@@ -169,20 +149,17 @@ public class SubcategoryServiceImpl implements SubcategoryService {
     @Override
     public Optional<Subcategory> getByTitle(String title) {
         log.info("getByTitle {}", title);
+
         return this.subcategoryRepository.findByTitle(title);
     }
 
     @Override
     @Cacheable(value = "productTypesOfSubcategory", key = "#id")
     public List<ProductTypeDto> getProductTypes(Integer id) {
+        log.info("getProductTypes {}", id);
+
         Subcategory subcategory = this.subcategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.subcategory.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.subcategory.not_found",id));
 
         return this.productTypeMapper.toDto(subcategory.getProductTypes());
     }
@@ -195,14 +172,11 @@ public class SubcategoryServiceImpl implements SubcategoryService {
             @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
     })
     public void assignImage(Integer id, MultipartFile image) {
+        log.info("assignImage {}", id);
+
         Subcategory subcategory = this.subcategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.subcategory.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.subcategory.not_found",id));
+
         String imageName = this.storageService.uploadImage(image);
         subcategory.setImage(imageName);
 
@@ -217,14 +191,11 @@ public class SubcategoryServiceImpl implements SubcategoryService {
             @CacheEvict(value = "productTypesOfSubcategory", key = "#id")
     })
     public void deleteImage(Integer id, String imageName) {
+        log.info("deleteImage {} {}", id, imageName);
+
         Subcategory subcategory = this.subcategoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.subcategory.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.subcategory.not_found",id));
+
         this.storageService.deleteImage(imageName);
         subcategory.setImage(null);
 

@@ -7,7 +7,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.dto.SubcategoryDto;
@@ -45,9 +44,6 @@ class CategoryServiceTest {
 
     @Mock
     private SubcategoryMapper subcategoryMapper;
-
-    @Mock
-    private MessageSource messageSource;
 
     @Mock
     private StorageService storageService;
@@ -95,13 +91,11 @@ class CategoryServiceTest {
     public void get_WhenCategoryNotExists_ShouldThrowNotFoundException() {
         //Arrange
         when(this.categoryRepository.findById(99)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Category not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.categoryService.get(99))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Category not found");
+                .hasMessage("error.category.not_found");
     }
 
     @Test
@@ -167,13 +161,11 @@ class CategoryServiceTest {
     public void update_WhenCategoryNotFound_ShouldThrowNotFoundException() {
         //Arrange
         when(this.categoryRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Category not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.categoryService.update(1, categoryDto))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Category not found");
+                .hasMessage("error.category.not_found");
     }
 
     @Test
@@ -193,8 +185,6 @@ class CategoryServiceTest {
     public void delete_WhenCategoryDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.categoryRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Category not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.categoryService.delete(1))
@@ -221,8 +211,6 @@ class CategoryServiceTest {
         //Arrange
         MultipartFile file = mock(MultipartFile.class);
         when(this.categoryRepository.findById(99)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Category not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.categoryService.assignImage(99, file))
@@ -280,13 +268,10 @@ class CategoryServiceTest {
     public void getSubcategories_WhenCategoryDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.categoryRepository.findById(999)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(anyString(), any(), any())).thenReturn("Category not found");
-        when(this.messageSource.getMessage(anyString(), any(), any()))
-                .thenReturn("Category not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.categoryService.getSubcategories(999))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Category not found");
+                .hasMessage("error.category.not_found");
     }
 }

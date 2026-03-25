@@ -19,8 +19,14 @@ public class AdviceController {
     private final MessageSource messageSource;
 
     @ExceptionHandler(NotFoundException.class)
-    public ProblemDetail problemDetail(NotFoundException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
+    public ProblemDetail handleException(NotFoundException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.NOT_FOUND, this.messageSource.getMessage(
+                        exception.getMessageKey(),
+                        exception.getArgs(),
+                        Locale.getDefault()
+                )
+        );
         problemDetail.setTitle(
                 this.messageSource.getMessage(
                         "error.title.not_found",
@@ -32,8 +38,21 @@ public class AdviceController {
     }
 
     @ExceptionHandler(ValidationException.class)
-    public ProblemDetail problemDetail(ValidationException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
+    public ProblemDetail handleException(ValidationException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+
+        if(exception.isRawMessage()) {
+            problemDetail.setDetail(exception.getMessage());
+        } else {
+            problemDetail.setDetail(
+                    this.messageSource.getMessage(
+                            exception.getMessageKey(),
+                            exception.getArgs(),
+                            Locale.getDefault()
+                    )
+            );
+        }
+
         problemDetail.setTitle(
                 this.messageSource.getMessage(
                         "error.title.validation",
@@ -45,8 +64,14 @@ public class AdviceController {
     }
 
     @ExceptionHandler(AlreadyExistsException.class)
-    public ProblemDetail problemDetail(AlreadyExistsException exception){
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    public ProblemDetail handleException(AlreadyExistsException exception){
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
+                HttpStatus.CONFLICT, this.messageSource.getMessage(
+                        exception.getMessageKey(),
+                        exception.getArgs(),
+                        Locale.getDefault()
+                )
+        );
         problemDetail.setTitle(
                 this.messageSource.getMessage(
                         "error.title.already_exist",

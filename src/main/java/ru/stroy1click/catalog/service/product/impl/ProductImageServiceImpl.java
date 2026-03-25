@@ -4,19 +4,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductImageDto;
-import ru.stroy1click.common.exception.NotFoundException;
-import ru.stroy1click.catalog.mapper.ProductImageMapper;
 import ru.stroy1click.catalog.entity.ProductImage;
+import ru.stroy1click.catalog.mapper.ProductImageMapper;
 import ru.stroy1click.catalog.repository.ProductImageRepository;
 import ru.stroy1click.catalog.service.product.ProductImageService;
+import ru.stroy1click.common.util.ExceptionUtils;
 
 import java.util.List;
-import java.util.Locale;
 
 @Slf4j
 @Service
@@ -27,8 +25,6 @@ public class ProductImageServiceImpl implements ProductImageService {
     private final ProductImageRepository productImageRepository;
 
     private final ProductImageMapper productImageMapper;
-
-    private final MessageSource messageSource;
 
     private final CacheClear cacheClear;
 
@@ -69,21 +65,9 @@ public class ProductImageServiceImpl implements ProductImageService {
         log.info("update {}, {}", id, productImageDto);
 
         this.productImageRepository.findById(id).ifPresentOrElse(productImage -> {
-            ProductImage updatedProductImage = ProductImage.builder()
-                    .id(id)
-                    .link(productImageDto.getLink())
-                    .product(productImage.getProduct())
-                    .build();
-
-            this.productImageRepository.save(updatedProductImage);
+            productImage.setLink(productImageDto.getLink());
         }, () -> {
-           throw new NotFoundException(
-                   this.messageSource.getMessage(
-                           "error.product_image",
-                           null,
-                           Locale.getDefault()
-                   )
-           );
+            throw ExceptionUtils.notFound("error.product_image", id);
         });
     }
 
@@ -92,15 +76,7 @@ public class ProductImageServiceImpl implements ProductImageService {
         log.info("delete {}", link);
 
         ProductImage productImage = this.productImageRepository.findByLink(link)
-                .orElseThrow(() ->
-                        new NotFoundException(
-                                this.messageSource.getMessage(
-                                        "error.product_image",
-                                        null,
-                                        Locale.getDefault()
-                                )
-                        )
-                );
+                .orElseThrow(() -> ExceptionUtils.notFound("error.product_image.not_found", link));
 
         this.cacheClear.clearProductImages(productImage.getProduct().getId());
         this.productImageRepository.delete(productImage);

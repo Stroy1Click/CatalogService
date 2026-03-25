@@ -48,14 +48,17 @@ class ProductTypeControllerIT {
     }
 
     @Test
-    public void get_WhenProductTypeDoesNotExist_ShouldThrowNotFoundExceptuon() {
+    public void get_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
+        //Arrange
+        int notExistsId = 99999;
+
         //Act
         ResponseEntity<ProblemDetail> response =
-                this.testRestTemplate.getForEntity("/api/v1/product-types/99999", ProblemDetail.class);
+                this.testRestTemplate.getForEntity("/api/v1/product-types/" + notExistsId, ProblemDetail.class);
 
         //Assert
         Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals("Тип продукта не найден", response.getBody().getDetail());
+        assertEquals("Тип продукта с id %d не найден".formatted(notExistsId), response.getBody().getDetail());
     }
 
     @Test
@@ -134,13 +137,16 @@ class ProductTypeControllerIT {
 
     @Test
     public void delete_WhenProductTypeDoesNotExist_ShouldThrowNotFoundException() {
+        //Arrange
+        int notExistsId = 99999;
+
         //Act
         ResponseEntity<ProblemDetail> response =
-                this.testRestTemplate.exchange("/api/v1/product-types/99999", HttpMethod.DELETE, HttpEntity.EMPTY, ProblemDetail.class);
+                this.testRestTemplate.exchange("/api/v1/product-types/" + notExistsId, HttpMethod.DELETE, HttpEntity.EMPTY, ProblemDetail.class);
 
         //Assert
         Assertions.assertTrue(response.getStatusCode().is4xxClientError());
-        assertEquals("Тип продукта не найден", response.getBody().getDetail());
+        assertEquals("Тип продукта с id %d не найден".formatted(notExistsId), response.getBody().getDetail());
     }
 
     @Test

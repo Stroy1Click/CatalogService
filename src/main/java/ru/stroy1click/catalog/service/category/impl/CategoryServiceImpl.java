@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,11 +19,10 @@ import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.common.event.CategoryCreatedEvent;
 import ru.stroy1click.common.event.CategoryDeletedEvent;
 import ru.stroy1click.common.event.CategoryUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
+import ru.stroy1click.common.util.ExceptionUtils;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 @Slf4j
@@ -38,8 +36,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     private final SubcategoryMapper subcategoryMapper;
-
-    private final MessageSource messageSource;
 
     private final StorageService storageService;
 
@@ -56,14 +52,10 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto get(Integer id) {
         log.info("get {}", id);
 
-        return this.categoryMapper.toDto(this.categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.category.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                )));
+        Category category = this.categoryRepository.findById(id)
+                .orElseThrow(() -> ExceptionUtils.notFound("error.category.not_found",id));
+
+        return this.categoryMapper.toDto(category);
     }
 
     @Override
@@ -115,13 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
 
             this.outboxEventService.save(CATEGORY_UPDATED_TOPIC, event);
         }, () -> {
-            throw new NotFoundException(
-                    this.messageSource.getMessage(
-                            "error.category.not_found",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
+            throw ExceptionUtils.notFound("error.category.not_found", id);
         });
     }
 
@@ -139,13 +125,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("delete {}", id);
 
         Category category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.category.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.category.not_found",id));
 
         CategoryDeletedEvent event = new CategoryDeletedEvent(id);
 
@@ -167,13 +147,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("getSubcategories {}", id);
 
         Category category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.category.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.category.not_found",id));
 
         return this.subcategoryMapper.toDto(category.getSubcategories());
     }
@@ -185,14 +159,9 @@ public class CategoryServiceImpl implements CategoryService {
             @CacheEvict(value = "allCategories", allEntries = true)
     })
     public void assignImage(Integer id, MultipartFile image) {
+        log.info("assignImage {}", id);
         Category category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.category.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.category.not_found",id));
 
         String imageName = this.storageService.uploadImage(image);
         category.setImage(imageName);
@@ -205,14 +174,10 @@ public class CategoryServiceImpl implements CategoryService {
             @CacheEvict(value = "allCategories", allEntries = true)
     })
     public void deleteImage(Integer id, String imageName) {
+        log.info("deleteImage {} {}", id, imageName);
+
         Category category = this.categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.category.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.category.not_found",id));
 
         this.storageService.deleteImage(imageName);
         category.setImage(null);

@@ -5,17 +5,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.ProductDto;
 import ru.stroy1click.catalog.dto.ProductImageDto;
 import ru.stroy1click.catalog.entity.Product;
-import ru.stroy1click.common.event.ProductCreatedEvent;
-import ru.stroy1click.common.event.ProductDeletedEvent;
-import ru.stroy1click.common.event.ProductUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductMapper;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
@@ -24,10 +19,13 @@ import ru.stroy1click.catalog.service.product.ProductService;
 import ru.stroy1click.catalog.service.product.type.ProductTypeService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.common.event.ProductCreatedEvent;
+import ru.stroy1click.common.event.ProductDeletedEvent;
+import ru.stroy1click.common.event.ProductUpdatedEvent;
+import ru.stroy1click.common.util.ExceptionUtils;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 
@@ -40,8 +38,6 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
 
     private final ProductMapper productMapper;
-
-    private final MessageSource messageSource;
 
     private final StorageService storageService;
 
@@ -66,14 +62,10 @@ public class ProductServiceImpl implements ProductService {
     public ProductDto get(Integer id) {
         log.info("get {}", id);
 
-        return this.productMapper.toDto(this.productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.product.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                )));
+        Product product = this.productRepository.findById(id)
+                .orElseThrow(() -> ExceptionUtils.notFound("error.product.not_found",id));
+
+        return this.productMapper.toDto(product);
     }
 
     @Override
@@ -143,13 +135,7 @@ public class ProductServiceImpl implements ProductService {
 
             this.outboxEventService.save(PRODUCT_UPDATED_TOPIC, event);
         }, () -> {
-            throw new NotFoundException(
-                    this.messageSource.getMessage(
-                            "error.product.not_found",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
+            throw ExceptionUtils.notFound("error.product.not_found", id);
         });
     }
 
@@ -163,13 +149,7 @@ public class ProductServiceImpl implements ProductService {
         log.info("delete {}", id);
 
         Product product = this.productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.product.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.product.not_found",id));
 
         ProductDeletedEvent event = new ProductDeletedEvent(id);
 
@@ -192,14 +172,10 @@ public class ProductServiceImpl implements ProductService {
     })
     public void assignImages(Integer id, List<MultipartFile> images) {
         log.info("assignImage {}", id);
+
         Product product = this.productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.product.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.product.not_found",id));
+
         List<ProductImageDto> imageNames = this.storageService.uploadImages(images)
                 .stream()
                 .map(imageName -> new ProductImageDto(
@@ -220,14 +196,9 @@ public class ProductServiceImpl implements ProductService {
     })
     public void deleteImage(Integer id, String link) {
         log.info("deleteImage {} {}", id, link);
+
         Product product = this.productRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(
-                        this.messageSource.getMessage(
-                                "error.product.not_found",
-                                null,
-                                Locale.getDefault()
-                        )
-                ));
+                .orElseThrow(() -> ExceptionUtils.notFound("error.product.not_found",id));
 
         this.productImageService.delete(link);
     }

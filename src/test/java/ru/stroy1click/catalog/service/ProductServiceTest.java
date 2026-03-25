@@ -3,9 +3,9 @@ package ru.stroy1click.catalog.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.MessageSource;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.dto.CategoryDto;
 import ru.stroy1click.catalog.dto.ProductDto;
@@ -15,11 +15,6 @@ import ru.stroy1click.catalog.entity.Category;
 import ru.stroy1click.catalog.entity.Product;
 import ru.stroy1click.catalog.entity.ProductType;
 import ru.stroy1click.catalog.entity.Subcategory;
-import ru.stroy1click.common.dto.Unit;
-import ru.stroy1click.common.event.ProductCreatedEvent;
-import ru.stroy1click.common.event.ProductDeletedEvent;
-import ru.stroy1click.common.event.ProductUpdatedEvent;
-import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductMapper;
 import ru.stroy1click.catalog.repository.ProductRepository;
 import ru.stroy1click.catalog.service.category.CategoryService;
@@ -28,13 +23,19 @@ import ru.stroy1click.catalog.service.product.impl.ProductServiceImpl;
 import ru.stroy1click.catalog.service.product.type.ProductTypeService;
 import ru.stroy1click.catalog.service.storage.StorageService;
 import ru.stroy1click.catalog.service.subcategory.SubcategoryService;
+import ru.stroy1click.common.dto.Unit;
+import ru.stroy1click.common.event.ProductCreatedEvent;
+import ru.stroy1click.common.event.ProductDeletedEvent;
+import ru.stroy1click.common.event.ProductUpdatedEvent;
+import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.outbox.service.OutboxEventService;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -46,9 +47,6 @@ class ProductServiceTest {
 
     @Mock
     private ProductMapper productMapper;
-
-    @Mock
-    private MessageSource messageSource;
 
     @Mock
     private StorageService storageService;
@@ -159,13 +157,10 @@ class ProductServiceTest {
     public void get_WhenProductDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product.not_found"), any(), any()))
-                .thenReturn("Product not found");
-
         //Assert
         assertThatThrownBy(() -> this.productService.get(1))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Product not found");
+                .hasMessage("error.product.not_found");
     }
 
     @Test
@@ -274,13 +269,11 @@ class ProductServiceTest {
     public void update_WhenProductDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product.not_found"), any(), any()))
-                .thenReturn("Product not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productService.update(1, productDto))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Product not found");
+                .hasMessage("error.product.not_found");
     }
 
     @Test
@@ -300,13 +293,11 @@ class ProductServiceTest {
     public void delete_WhenProductDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product.not_found"), any(), any()))
-                .thenReturn("Product not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productService.delete(1))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Product not found");
+                .hasMessage("error.product.not_found");
     }
 
     @Test
@@ -353,13 +344,11 @@ class ProductServiceTest {
     public void assignImages_WhenProductDoesNotExist_ShouldThrowNotFound() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product.not_found"), any(), any()))
-                .thenReturn("Product not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productService.assignImages(1, List.of()))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Product not found");
+                .hasMessage("error.product.not_found");
     }
 
     @Test
@@ -378,12 +367,10 @@ class ProductServiceTest {
     public void deleteImage_WhenProductDoesNotExist_ShouldThrowNotFound() {
         //Arrange
         when(this.productRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product.not_found"), any(), any()))
-                .thenReturn("Product not found");
 
         //Act & Assert
         assertThatThrownBy(() -> this.productService.deleteImage(1, "img.png"))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Product not found");
+                .hasMessage("error.product.not_found");
     }
 }

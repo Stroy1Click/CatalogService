@@ -1,25 +1,25 @@
 package ru.stroy1click.catalog.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.context.MessageSource;
 import ru.stroy1click.catalog.cache.CacheClear;
 import ru.stroy1click.catalog.dto.ProductImageDto;
 import ru.stroy1click.catalog.entity.Product;
 import ru.stroy1click.catalog.entity.ProductImage;
-import ru.stroy1click.common.exception.NotFoundException;
 import ru.stroy1click.catalog.mapper.ProductImageMapper;
 import ru.stroy1click.catalog.repository.ProductImageRepository;
 import ru.stroy1click.catalog.service.product.impl.ProductImageServiceImpl;
+import ru.stroy1click.common.exception.NotFoundException;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductImageServiceTest {
@@ -29,9 +29,6 @@ class ProductImageServiceTest {
 
     @Mock
     private ProductImageMapper productImageMapper;
-
-    @Mock
-    private MessageSource messageSource;
 
     @Mock
     private CacheClear cacheClear;
@@ -155,12 +152,8 @@ class ProductImageServiceTest {
         this.productImageService.update(1, updatedDto);
 
         //Assert
-        ArgumentCaptor<ProductImage> captor = ArgumentCaptor.forClass(ProductImage.class);
-        verify(this.productImageRepository).save(captor.capture());
-        ProductImage saved = captor.getValue();
-        assertEquals(1, saved.getId());
-        assertEquals("updatedLink", saved.getLink());
-        assertEquals(productImage.getProduct(), saved.getProduct());
+        assertEquals(1, productImage.getId());
+        assertEquals("updatedLink", productImage.getLink());
     }
 
     @Test
@@ -169,15 +162,13 @@ class ProductImageServiceTest {
         ProductImageDto updatedDto = new ProductImageDto();
         updatedDto.setLink("updatedLink");
         when(this.productImageRepository.findById(1)).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product_image"), any(), any(Locale.class)))
-                .thenReturn("Image not found");
 
         //Act
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> this.productImageService.update(1, updatedDto));
 
         //Assert
-        assertEquals("Image not found", exception.getMessage());
+        assertEquals("error.product_image", exception.getMessage());
     }
 
     @Test
@@ -197,15 +188,13 @@ class ProductImageServiceTest {
     void delete_WhenImageDoesNotExist_ShouldThrowNotFoundException() {
         //Arrange
         when(this.productImageRepository.findByLink("link1")).thenReturn(Optional.empty());
-        when(this.messageSource.getMessage(eq("error.product_image"), any(), any(Locale.class)))
-                .thenReturn("Image not found");
 
         //Act
         NotFoundException exception = assertThrows(NotFoundException.class,
                 () -> this.productImageService.delete("link1"));
 
         //Assert
-        assertEquals("Image not found", exception.getMessage());
+        assertEquals("error.product_image.not_found", exception.getMessage());
     }
 }
 

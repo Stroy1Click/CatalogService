@@ -2,15 +2,13 @@ package ru.stroy1click.catalog.validator.product.type.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import ru.stroy1click.catalog.dto.ProductTypeDto;
 import ru.stroy1click.catalog.entity.ProductType;
-import ru.stroy1click.common.exception.AlreadyExistsException;
 import ru.stroy1click.catalog.service.product.type.ProductTypeService;
 import ru.stroy1click.catalog.validator.product.type.ProductTypeUpdateValidator;
+import ru.stroy1click.common.util.ExceptionUtils;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -21,8 +19,6 @@ public class ProductTypeUpdateValidatorImpl implements ProductTypeUpdateValidato
 
     private final ProductTypeService productTypeService;
 
-    private final MessageSource messageSource;
-
     @Override
     public void validate(ProductTypeDto productTypeDto){
         log.info("validate {}", productTypeDto);
@@ -30,13 +26,7 @@ public class ProductTypeUpdateValidatorImpl implements ProductTypeUpdateValidato
 
         if(foundSubcategory.isPresent() && !Objects.equals(productTypeDto.getId(), foundSubcategory.get().getId())
                 && productTypeDto.getTitle().equalsIgnoreCase(foundSubcategory.get().getTitle())){
-            throw new AlreadyExistsException(
-                    this.messageSource.getMessage(
-                            "error.product_type.update.validate",
-                            null,
-                            Locale.getDefault()
-                    )
-            );
+            throw ExceptionUtils.alreadyExists("error.product_type.update.validate", productTypeDto.getTitle());
         }
     }
 }
