@@ -24,9 +24,9 @@ public class Category {
 
     private String image;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Subcategory> subcategories;
 
-    @OneToMany(mappedBy = "category")
+    @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<Product> products;
 }
