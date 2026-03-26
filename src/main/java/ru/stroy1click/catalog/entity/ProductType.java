@@ -24,10 +24,10 @@ public class ProductType {
 
     private String image;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subcategory_id", referencedColumnName = "id")
     private Subcategory subcategory;
 
-    @OneToMany(mappedBy = "productType")
+    @OneToMany(mappedBy = "productType", fetch = FetchType.LAZY)
     private List<Product> products;
 }
