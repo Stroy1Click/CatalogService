@@ -11,10 +11,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.stroy1click.catalog.dto.ProductTypeDto;
-import ru.stroy1click.catalog.service.product.type.ProductTypeService;
-import ru.stroy1click.catalog.validator.product.type.ProductTypeCreateValidator;
-import ru.stroy1click.catalog.validator.product.type.ProductTypeUpdateValidator;
+import ru.stroy1click.catalog.api.controller.ProductTypeController;
+import ru.stroy1click.catalog.domain.producttype.dto.ProductTypeDto;
+import ru.stroy1click.catalog.domain.producttype.service.ProductTypeService;
+import ru.stroy1click.catalog.domain.producttype.validator.ProductTypeCreateValidator;
+import ru.stroy1click.catalog.domain.producttype.validator.ProductTypeUpdateValidator;
 import ru.stroy1click.common.validator.ImageValidator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

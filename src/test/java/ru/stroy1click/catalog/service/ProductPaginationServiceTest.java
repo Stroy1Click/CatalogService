@@ -14,12 +14,12 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.*;
-import ru.stroy1click.catalog.dto.ProductDto;
+import ru.stroy1click.catalog.domain.product.dto.ProductDto;
 import ru.stroy1click.common.exception.ValidationException;
-import ru.stroy1click.catalog.dto.PageResponse;
-import ru.stroy1click.catalog.repository.ProductRepository;
-import ru.stroy1click.catalog.service.product.ProductService;
-import ru.stroy1click.catalog.service.product.impl.ProductPaginationServiceImpl;
+import ru.stroy1click.catalog.domain.common.dto.PageResponse;
+import ru.stroy1click.catalog.domain.product.repository.ProductRepository;
+import ru.stroy1click.catalog.domain.product.service.ProductService;
+import ru.stroy1click.catalog.domain.product.service.impl.ProductPaginationServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class ProductPaginationServiceTest {

@@ -11,12 +11,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import ru.stroy1click.catalog.dto.ProductDto;
-import ru.stroy1click.catalog.service.product.ProductImageService;
-import ru.stroy1click.catalog.service.product.ProductPaginationService;
-import ru.stroy1click.catalog.service.product.ProductService;
-import ru.stroy1click.catalog.validator.product.ProductCreateValidator;
-import ru.stroy1click.catalog.validator.product.ProductUpdateValidator;
+import ru.stroy1click.catalog.api.controller.ProductController;
+import ru.stroy1click.catalog.domain.product.dto.ProductDto;
+import ru.stroy1click.catalog.domain.product.image.service.ProductImageService;
+import ru.stroy1click.catalog.domain.product.service.ProductPaginationService;
+import ru.stroy1click.catalog.domain.product.service.ProductService;
+import ru.stroy1click.catalog.domain.product.validator.ProductCreateValidator;
+import ru.stroy1click.catalog.domain.product.validator.ProductUpdateValidator;
 import ru.stroy1click.common.dto.Unit;
 import ru.stroy1click.common.validator.ImageValidator;
 
@@ -155,7 +156,7 @@ public class ProductControllerTest {
         MvcResult result = this.mockMvc.perform(requestBuilder).andReturn();
         String string = result.getResponse().getContentAsString();
         ProblemDetail problemDetail = new ObjectMapper().readValue(string, ProblemDetail.class);
-        int status = result.getResponse().getStatus();;
+        int status = result.getResponse().getStatus();
 
         //Assert
         assertEquals(400, status);

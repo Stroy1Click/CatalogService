@@ -15,9 +15,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import ru.stroy1click.catalog.config.TestcontainersConfiguration;
-import ru.stroy1click.catalog.dto.ProductDto;
-import ru.stroy1click.catalog.dto.ProductImageDto;
-import ru.stroy1click.catalog.service.storage.StorageService;
+import ru.stroy1click.catalog.domain.product.dto.ProductDto;
+import ru.stroy1click.catalog.domain.product.image.dto.ProductImageDto;
+import ru.stroy1click.catalog.domain.common.service.StorageService;
 import ru.stroy1click.common.dto.Unit;
 
 import java.math.BigDecimal;
