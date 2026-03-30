@@ -13,8 +13,8 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.multipart.MultipartFile;
 import ru.stroy1click.catalog.config.TestcontainersConfiguration;
-import ru.stroy1click.catalog.dto.CategoryDto;
-import ru.stroy1click.catalog.service.storage.StorageService;
+import ru.stroy1click.catalog.domain.category.dto.CategoryDto;
+import ru.stroy1click.catalog.domain.common.service.StorageService;
 
 import java.io.IOException;
 
