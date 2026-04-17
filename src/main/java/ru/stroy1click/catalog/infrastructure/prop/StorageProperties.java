@@ -20,4 +20,6 @@ public class StorageProperties {
     @Value("${s3.bucket-name}")
     private String bucketName;
 
+    @Value("${s3.storage-url}")
+    private String storageUrl;
 }

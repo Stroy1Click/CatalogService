@@ -67,6 +67,7 @@ s3:
   secret-key: 2bd487564bb54e9a8231bb3944108971
   region: ru-7
   bucket-name: stroy1click
+  storage-url: https://s3.twcstorage.ru
 
 resilience4j:
   circuitbreaker:
